@@ -18,7 +18,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: 'Ant Design Pro',
+      default: '鸿泰黄金珠宝',
       required: false
     },
     showTitle: {

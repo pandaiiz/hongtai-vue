@@ -20,10 +20,16 @@ export const asyncRouterMap = [
         meta: { title: '信息录入', keepAlive: true, icon: 'edit', permission: [ 'dashboard' ] },
         children: [
           {
-            path: '/send/edit-table',
+            path: '/send/send-receive',
             name: 'EditList',
             component: () => import('@/views/send/TableInnerEditList'),
             meta: { title: '收发管理', keepAlive: true }
+          },
+          {
+            path: '/send/io-order',
+            name: 'InAndOutOrder',
+            component: () => import('@/views/send/InAndOutOrder'),
+            meta: { title: '出入库单', keepAlive: true }
           }
         ]
       },

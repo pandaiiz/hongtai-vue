@@ -1,11 +1,11 @@
 <template>
   <div>
-    <a-card class="card" title="仓库管理" :bordered="false">
+    <!-- <a-card class="card" title="仓库管理" :bordered="false">
       <repository-form ref="repository" :showSubmit="false" />
     </a-card>
     <a-card class="card" title="任务管理" :bordered="false">
       <task-form ref="task" :showSubmit="false" />
-    </a-card>
+    </a-card> -->
 
     <!-- table -->
     <a-card>

@@ -2,6 +2,7 @@ import { axios } from '@/utils/request'
 
 const api = {
   data: '/machining',
+  list: '/list',
   user: '/user',
   role: '/role',
   service: '/service',
@@ -13,11 +14,17 @@ const api = {
 export default api
 
 export function getDataList (parameter) {
-  console.log(parameter)
   return axios({
     url: api.data,
     method: 'get',
     params: parameter
+  })
+}
+
+export function getInfoList () {
+  return axios({
+    url: api.list,
+    method: 'get'
   })
 }
 

@@ -1,68 +1,36 @@
 <template>
   <a-card :bordered="false">
-    <div class="table-page-search-wrapper">
-      <a-form layout="inline">
-        <a-row :gutter="48">
-          <a-col :md="8" :sm="24">
-            <a-form-item label="规则编号">
-              <a-input placeholder=""/>
-            </a-form-item>
-          </a-col>
-          <a-col :md="8" :sm="24">
-            <a-form-item label="使用状态">
-              <a-select placeholder="请选择" default-value="0">
-                <a-select-option value="0">全部</a-select-option>
-                <a-select-option value="1">关闭</a-select-option>
-                <a-select-option value="2">运行中</a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-col>
-          <template v-if="advanced">
-            <a-col :md="8" :sm="24">
-              <a-form-item label="调用次数">
-                <a-input-number style="width: 100%"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="更新日期">
-                <a-date-picker style="width: 100%" placeholder="请输入更新日期"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="使用状态">
-                <a-select placeholder="请选择" default-value="0">
-                  <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="1">关闭</a-select-option>
-                  <a-select-option value="2">运行中</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item label="使用状态">
-                <a-select placeholder="请选择" default-value="0">
-                  <a-select-option value="0">全部</a-select-option>
-                  <a-select-option value="1">关闭</a-select-option>
-                  <a-select-option value="2">运行中</a-select-option>
-                </a-select>
-              </a-form-item>
-            </a-col>
-          </template>
-          <a-col :md="!advanced && 8 || 24" :sm="24">
-            <span class="table-page-search-submitButtons" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
-              <a-button type="primary">查询</a-button>
-              <a-button style="margin-left: 8px">重置</a-button>
-              <a @click="toggleAdvanced" style="margin-left: 8px">
-                {{ advanced ? '收起' : '展开' }}
-                <a-icon :type="advanced ? 'up' : 'down'"/>
-              </a>
-            </span>
-          </a-col>
-        </a-row>
+    <!-- <div class="table-page-search-wrapper">
+      <a-form @submit="handleSubmit" :form="form">
+        <a-form-item
+          :md="24"
+          :sm="24"
+          v-for="(list, key) in listData"
+          :key="key"
+          :label="key">
+          <a-radio-group v-if="key === 'quality'" buttonStyle="solid" v-model="queryParam[key]">
+            <a-radio-button v-for="(item, index) in list" :key="index" :value="item.name">{{ item.name }}</a-radio-button>
+          </a-radio-group>
+          <a-radio-group v-else buttonStyle="solid" v-model="queryParam[key]">
+            <a-radio-button v-for="(item, index) in list" :key="index" :value="item">{{ item }}</a-radio-button>
+          </a-radio-group>
+        </a-form-item>
+        <a-form-item
+          :wrapperCol="{ span: 24 }"
+          style="text-align: center"
+        >
+          <a-button @click="submitTest" htmlType="submit" type="primary">提交</a-button>
+          <a-button style="margin-left: 8px">保存</a-button>
+        </a-form-item>
       </a-form>
-    </div>
+    </div> -->
+    <!-- <a-button @click="submitTest" type="primary">提22交</a-button> -->
+    <a-button type="primary" @click="showDrawer" style="margin-bottom: 8px;">
+      <a-icon type="plus" /> 新增
+    </a-button>
 
     <div class="table-operator">
-      <a-button type="primary" icon="plus">新建</a-button>
+      <!-- <a-button type="primary" icon="plus">新建</a-button> -->
       <a-dropdown v-if="selectedRowKeys.length > 0">
         <a-menu slot="overlay">
           <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
@@ -78,9 +46,9 @@
     <s-table
       ref="table"
       size="middle"
+      :scroll="{ x : true }"
       :columns="columns"
-      :data="loadData"
-    >
+      :data="loadData">
       <template v-for="(col, index) in columns" v-if="col.scopedSlots" :slot="col.dataIndex" slot-scope="text, record">
         <div :key="index">
           <a-input
@@ -110,12 +78,150 @@
       </template>
     </s-table>
 
+    <a-drawer
+      title="新建收发"
+      :width="720"
+      @close="onClose"
+      :visible="visible"
+      :wrapStyle="{height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px'}">
+      <a-form :form="form" layout="vertical" hideRequiredMark>
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="备注">
+              <a-input
+                v-decorator="['remarks', {
+                  rules: [{ required: true, message: '请输入备注' }]
+                }]"
+                placeholder="请输入备注"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="ID">
+              <a-input
+                v-decorator="['id', {
+                  rules: [{ required: true, message: '请输入ID' }]
+                }]"
+                placeholder="请输入ID"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="重量">
+              <!-- <a-input
+                v-decorator="['weight', {
+                  rules: [{ required: true, message: '请输入重量' }]
+                }]"
+                placeholder="请输入重量"
+              /> -->
+              <a-input-search placeholder="请读取重量" size="default">
+                <a-button slot="enterButton">读称</a-button>
+              </a-input-search>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="件数">
+              <a-input
+                v-decorator="['number', {
+                  rules: [{ required: true, message: '请输入件数' }]
+                }]"
+                placeholder="请输入件数"
+              />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="24">
+            <a-form-item label="部门">
+              <a-radio-group buttonStyle="solid" v-model="queryParam.department">
+                <a-radio-button v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
+            <a-form-item label="类别">
+              <a-radio-group buttonStyle="solid" v-model="queryParam.category">
+                <a-radio-button v-for="item in listData.category" :key="item" :value="item">{{ item }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
+            <a-form-item label="成色">
+              <a-radio-group buttonStyle="solid" v-model="queryParam.quality">
+                <a-radio-button v-for="item in listData.quality" :key="item.name" :value="item.name">{{ item.name }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
+            <a-form-item label="产品">
+              <a-radio-group buttonStyle="solid" v-model="queryParam.product">
+                <a-radio-button v-for="item in listData.product" :key="item" :value="item">{{ item }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <!-- <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="Approver">
+              <a-select
+                v-decorator="['approver', {
+                  rules: [{ required: true, message: 'Please choose the approver' }]
+                }]"
+                placeholder="Please choose the approver"
+              >
+                <a-select-option value="jack">Jack Ma</a-select-option>
+                <a-select-option value="tom">Tom Liu</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="DateTime">
+              <a-date-picker
+                v-decorator="['dateTime', {
+                  rules: [{ required: true, message: 'Please choose the dateTime' }]
+                }]"
+                style="width: 100%"
+                :getPopupContainer="trigger => trigger.parentNode"
+              />
+            </a-form-item>
+          </a-col>
+        </a-row> -->
+      </a-form>
+      <div
+        :style="{
+          position: 'absolute',
+          left: 0,
+          bottom: 0,
+          width: '100%',
+          borderTop: '1px solid #e9e9e9',
+          padding: '10px 16px',
+          background: '#fff',
+          textAlign: 'right',
+        }"
+      >
+        <a-button
+          :style="{marginRight: '8px'}"
+          @click="onClose">
+          补录
+        </a-button>
+        <a-button
+          :style="{marginRight: '8px'}"
+          @click="onClose">
+          重置
+        </a-button>
+        <a-button :style="{marginRight: '8px'}" @click="onClose" type="primary">
+          收货
+        </a-button>
+        <a-button @click="onClose" type="primary">发货</a-button>
+      </div>
+    </a-drawer>
+
   </a-card>
 </template>
 
 <script>
 import { STable } from '@/components'
-import { getDataList } from '@/api/manage'
+import { getDataList, getInfoList } from '@/api/manage'
 import moment from 'moment'
 
 export default {
@@ -125,10 +231,13 @@ export default {
   },
   data () {
     return {
+      visible: false,
       // 高级搜索 展开/关闭
-      advanced: false,
+      advanced: true,
       // 查询参数
       queryParam: {},
+      form: this.$form.createForm(this),
+      listData: {},
       // 表头
       columns: [
         {
@@ -154,7 +263,7 @@ export default {
           align: 'center',
           title: '类型',
           dataIndex: 'type',
-          customRender: (type) => { if (type === 'send') { return '发货' } else { return '收货' } }
+          customRender: (type) => type === 'send' ? <div>发货</div> : <div>收货</div>
         },
         {
           align: 'center',
@@ -187,15 +296,19 @@ export default {
           scopedSlots: { customRender: 'remarks' }
         },
         {
+          width: '120px',
           align: 'center',
           title: '时间',
           dataIndex: 'timestamp',
-          customRender: (time) => { return moment(time).format('YYYY-MM-DD HH:mm:ss') }
+          fixed: 'right',
+          customRender: (time) => { return <div>{moment(time).format('YYYY-MM-DD HH:mm:ss')}</div> }
         },
         {
+          width: '100px',
           align: 'center',
           table: '操作',
           dataIndex: 'action',
+          fixed: 'right',
           scopedSlots: { customRender: 'action' }
         }
       ],
@@ -203,15 +316,43 @@ export default {
       loadData: parameter => {
         return getDataList(Object.assign(parameter, this.queryParam))
           .then(res => {
+            res.result.data.map((val) => {
+              val['editable'] = false
+            })
             return res.result
           })
       },
-
       selectedRowKeys: [],
       selectedRows: []
     }
   },
+  created () {
+    this.loadList()
+  },
   methods: {
+    showDrawer () {
+      this.visible = true
+    },
+    onClose () {
+      this.visible = false
+    },
+    loadList () {
+      getInfoList()
+        .then(res => {
+          this.listData = res
+        })
+    },
+    submitTest () {
+      console.log(this.queryParam)
+    },
+    handleSubmit (e) {
+      e.preventDefault()
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          console.log('Received values of form: ', values)
+        }
+      })
+    },
 
     handleChange (value, key, column, record) {
       console.log(value, key, column)
@@ -249,7 +390,6 @@ export default {
     cancel (row) {
       row.editable = false
     },
-
     onSelectChange (selectedRowKeys, selectedRows) {
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
@@ -287,6 +427,10 @@ export default {
 
   .operator {
     margin-bottom: 18px;
+  }
+
+  .ant-table .ant-table-row td > div, .ant-table .ant-table-row td {
+    white-space: nowrap;
   }
 
   @media screen and (max-width: 900px) {
