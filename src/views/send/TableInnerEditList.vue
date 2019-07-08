@@ -1,48 +1,17 @@
 <template>
   <a-card :bordered="false">
-    <!-- <div class="table-page-search-wrapper">
-      <a-form @submit="handleSubmit" :form="form">
-        <a-form-item
-          :md="24"
-          :sm="24"
-          v-for="(list, key) in listData"
-          :key="key"
-          :label="key">
-          <a-radio-group v-if="key === 'quality'" buttonStyle="solid" v-model="queryParam[key]">
-            <a-radio-button v-for="(item, index) in list" :key="index" :value="item.name">{{ item.name }}</a-radio-button>
-          </a-radio-group>
-          <a-radio-group v-else buttonStyle="solid" v-model="queryParam[key]">
-            <a-radio-button v-for="(item, index) in list" :key="index" :value="item">{{ item }}</a-radio-button>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item
-          :wrapperCol="{ span: 24 }"
-          style="text-align: center"
-        >
-          <a-button @click="submitTest" htmlType="submit" type="primary">提交</a-button>
-          <a-button style="margin-left: 8px">保存</a-button>
-        </a-form-item>
-      </a-form>
-    </div> -->
-    <!-- <a-button @click="submitTest" type="primary">提22交</a-button> -->
-    <a-button type="primary" @click="showDrawer" style="margin-bottom: 8px;">
-      <a-icon type="plus" /> 新增
-    </a-button>
-
-    <div class="table-operator">
-      <!-- <a-button type="primary" icon="plus">新建</a-button> -->
-      <a-dropdown v-if="selectedRowKeys.length > 0">
-        <a-menu slot="overlay">
-          <a-menu-item key="1"><a-icon type="delete" />删除</a-menu-item>
-          <!-- lock | unlock -->
-          <a-menu-item key="2"><a-icon type="lock" />锁定</a-menu-item>
-        </a-menu>
-        <a-button style="margin-left: 8px">
-          批量操作 <a-icon type="down" />
-        </a-button>
-      </a-dropdown>
-    </div>
-
+    <a-row :span="24">
+      <a-range-picker @change="onChange"/>
+      <a-select defaultValue="lucy" style="width: 120px" v-model="queryParam.department">
+        <a-select-option v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-select-option>
+      </a-select>
+      <a-button type="primary" @click="queryData" style="margin-bottom: 8px;">
+        <a-icon type="search" /> 查询
+      </a-button>
+      <a-button type="primary" @click="showDrawer" style="margin-bottom: 8px;">
+        <a-icon type="plus" /> 新增
+      </a-button>
+    </a-row>
     <s-table
       ref="table"
       size="middle"
@@ -84,48 +53,50 @@
       @close="onClose"
       :visible="visible"
       :wrapStyle="{height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px'}">
-      <a-form :form="form" layout="vertical" hideRequiredMark>
+      <a-form :form="form" layout="vertical" hideRequiredMark @submit="handleSubmit">
         <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="备注">
-              <a-input
-                v-decorator="['remarks', {
-                  rules: [{ required: true, message: '请输入备注' }]
-                }]"
-                placeholder="请输入备注"
-              />
-            </a-form-item>
-          </a-col>
           <a-col :span="12">
             <a-form-item label="ID">
               <a-input
-                v-decorator="['id', {
-                  rules: [{ required: true, message: '请输入ID' }]
-                }]"
                 placeholder="请输入ID"
+                v-decorator="[
+                  'id', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入ID' }]}
+                ]"
               />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="重量">
-              <!-- <a-input
-                v-decorator="['weight', {
-                  rules: [{ required: true, message: '请输入重量' }]
-                }]"
-                placeholder="请输入重量"
-              /> -->
-              <a-input-search placeholder="请读取重量" size="default">
-                <a-button slot="enterButton">读称</a-button>
-              </a-input-search>
             </a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item label="件数">
               <a-input
-                v-decorator="['number', {
-                  rules: [{ required: true, message: '请输入件数' }]
-                }]"
                 placeholder="请输入件数"
+                v-decorator="[
+                  'number', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入件数' }]}
+                ]"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="重量">
+              <a-input-search
+                v-decorator="[
+                  'weight', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请读取重量' }]}
+                ]"
+                placeholder="请读取重量"
+                size="default">
+                <a-button slot="enterButton">读称</a-button>
+              </a-input-search>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="备注">
+              <a-input
+                v-decorator="[
+                  'remarks'
+                ]"
+                placeholder="请输入备注"
               />
             </a-form-item>
           </a-col>
@@ -133,87 +104,90 @@
         <a-row :gutter="16">
           <a-col :span="24">
             <a-form-item label="部门">
-              <a-radio-group buttonStyle="solid" v-model="queryParam.department">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'department'
+                ]">
                 <a-radio-button v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
           <a-col :span="24">
             <a-form-item label="类别">
-              <a-radio-group buttonStyle="solid" v-model="queryParam.category">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'category'
+                ]">
                 <a-radio-button v-for="item in listData.category" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
           <a-col :span="24">
             <a-form-item label="成色">
-              <a-radio-group buttonStyle="solid" v-model="queryParam.quality">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'quality'
+                ]">
                 <a-radio-button v-for="item in listData.quality" :key="item.name" :value="item.name">{{ item.name }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
           <a-col :span="24">
             <a-form-item label="产品">
-              <a-radio-group buttonStyle="solid" v-model="queryParam.product">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'product'
+                ]">
                 <a-radio-button v-for="item in listData.product" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
+          <a-col :span="24">
+            <a-form-item label="类型">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'type',
+                  {rules: [{ required: true, message: '请选择发货类型' }]}
+                ]">
+                <a-radio-button value="send">发货</a-radio-button>
+                <a-radio-button value="receive">收货</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
         </a-row>
-        <!-- <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="Approver">
-              <a-select
-                v-decorator="['approver', {
-                  rules: [{ required: true, message: 'Please choose the approver' }]
-                }]"
-                placeholder="Please choose the approver"
-              >
-                <a-select-option value="jack">Jack Ma</a-select-option>
-                <a-select-option value="tom">Tom Liu</a-select-option>
-              </a-select>
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="DateTime">
-              <a-date-picker
-                v-decorator="['dateTime', {
-                  rules: [{ required: true, message: 'Please choose the dateTime' }]
-                }]"
-                style="width: 100%"
-                :getPopupContainer="trigger => trigger.parentNode"
-              />
-            </a-form-item>
-          </a-col>
-        </a-row> -->
+        <div
+          :style="{
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            width: '100%',
+            borderTop: '1px solid #e9e9e9',
+            padding: '10px 16px',
+            background: '#fff',
+            textAlign: 'right',
+          }"
+        >
+          <!-- <a-button
+            :style="{marginRight: '8px'}"
+            @click="onClose">
+            补录
+          </a-button> -->
+          <a-button
+            :style="{marginRight: '8px'}"
+            @click="clearSubmit">
+            重置
+          </a-button>
+          <a-button :style="{marginRight: '8px'}" @click="onClose" type="primary">
+            关闭
+          </a-button>
+          <a-button html-type="submit" type="primary">提交</a-button>
+        </div>
       </a-form>
-      <div
-        :style="{
-          position: 'absolute',
-          left: 0,
-          bottom: 0,
-          width: '100%',
-          borderTop: '1px solid #e9e9e9',
-          padding: '10px 16px',
-          background: '#fff',
-          textAlign: 'right',
-        }"
-      >
-        <a-button
-          :style="{marginRight: '8px'}"
-          @click="onClose">
-          补录
-        </a-button>
-        <a-button
-          :style="{marginRight: '8px'}"
-          @click="onClose">
-          重置
-        </a-button>
-        <a-button :style="{marginRight: '8px'}" @click="onClose" type="primary">
-          收货
-        </a-button>
-        <a-button @click="onClose" type="primary">发货</a-button>
-      </div>
     </a-drawer>
 
   </a-card>
@@ -236,6 +210,7 @@ export default {
       advanced: true,
       // 查询参数
       queryParam: {},
+      submitParam: {},
       form: this.$form.createForm(this),
       listData: {},
       // 表头
@@ -322,7 +297,6 @@ export default {
             return res.result
           })
       },
-      selectedRowKeys: [],
       selectedRows: []
     }
   },
@@ -330,6 +304,24 @@ export default {
     this.loadList()
   },
   methods: {
+    clearSubmit () {
+      this.form.resetFields()
+    },
+    queryData () {
+      getDataList(this.queryParam)
+        .then(res => {
+          res.result.data.map((val) => {
+            val['editable'] = false
+          })
+          return res.result
+        })
+    },
+    onChange (date, dateString) {
+      this.queryParam.date = {
+        start: dateString[0],
+        end: dateString[1]
+      }
+    },
     showDrawer () {
       this.visible = true
     },
@@ -342,14 +334,20 @@ export default {
           this.listData = res
         })
     },
-    submitTest () {
-      console.log(this.queryParam)
+    submitList () {
+      console.log(this.submitParam)
     },
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
+        console.log(values)
         if (!err) {
-          console.log('Received values of form: ', values)
+          this.$http.post('/machining', values).then(res => {
+            if (res.status === 'success') {
+              this.$message.info('新增成功！')
+              this.$refs.table.refresh()
+            }
+          })
         }
       })
     },
@@ -368,7 +366,7 @@ export default {
       console.log(row)
       this.$confirm({
         title: '警告',
-        content: `真的要删除 ${row.no} 吗?`,
+        content: `真的要删除此条信息吗?`,
         okText: '删除',
         okType: 'danger',
         cancelText: '取消',
@@ -389,10 +387,6 @@ export default {
     },
     cancel (row) {
       row.editable = false
-    },
-    onSelectChange (selectedRowKeys, selectedRows) {
-      this.selectedRowKeys = selectedRowKeys
-      this.selectedRows = selectedRows
     },
     toggleAdvanced () {
       this.advanced = !this.advanced
