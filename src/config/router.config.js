@@ -26,10 +26,38 @@ export const asyncRouterMap = [
             meta: { title: '收发管理', keepAlive: true }
           },
           {
-            path: '/send/io-order',
+            path: '/send/order',
             name: 'InAndOutOrder',
-            component: () => import('@/views/send/InAndOutOrder'),
+            component: () => import('@/views/send/order/Order'),
             meta: { title: '出入库单', keepAlive: true }
+          }
+        ]
+      },
+      // report
+      {
+        path: '/report',
+        name: 'report',
+        component: RouteView,
+        redirect: '/report/basic',
+        meta: { title: '报表页', icon: 'profile', permission: [ 'profile' ] },
+        children: [
+          {
+            path: '/report/total',
+            name: 'ReportTotal',
+            component: () => import('@/views/report/total/ReportTotal'),
+            meta: { title: '总计', permission: [ 'profile' ] }
+          },
+          {
+            path: '/report/day',
+            name: 'ReportDay',
+            component: () => import('@/views/report/day/ReportDay'),
+            meta: { title: '每日', permission: [ 'profile' ] }
+          },
+          {
+            path: '/report/advanced',
+            name: 'ProfileAdvanced',
+            component: () => import('@/views/report/advanced/Advanced'),
+            meta: { title: '高级详情页', permission: [ 'profile' ] }
           }
         ]
       },
