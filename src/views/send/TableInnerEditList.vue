@@ -1,14 +1,15 @@
 <template>
   <a-card :bordered="false">
     <a-row :span="24">
-      <a-range-picker @change="onChange"/>
-      <a-select defaultValue="lucy" style="width: 120px" v-model="queryParam.department">
+      <a-range-picker v-model="queryParam.date"/>
+      <a-select defaultValue="lucy" style="width: 120px;margin-left: 8px" v-model="queryParam.department">
         <a-select-option v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-select-option>
       </a-select>
-      <a-button type="primary" @click="queryData" style="margin-bottom: 8px;">
+      <a-button style="margin-left: 8px" @click="() => queryParam = {}">重置</a-button>
+      <a-button style="margin-left: 8px" type="primary" @click="$refs.table.refresh(true)">
         <a-icon type="search" /> 查询
       </a-button>
-      <a-button type="primary" @click="showDrawer" style="margin-bottom: 8px;">
+      <a-button style="margin-left: 8px" type="primary" @click="showDrawer">
         <a-icon type="plus" /> 新增
       </a-button>
     </a-row>
@@ -39,8 +40,8 @@
             </a-popconfirm>
           </span>
           <span v-else>
-            <a class="edit" @click="() => edit(record)">修改</a>
-            <a-divider type="vertical" />
+            <!-- <a class="edit" @click="() => edit(record)">修改</a> -->
+            <!-- <a-divider type="vertical" /> -->
             <a class="delete" @click="() => del(record)">删除</a>
           </span>
         </div>
@@ -304,17 +305,17 @@ export default {
     this.loadList()
   },
   methods: {
-    clearSubmit () {
-      this.form.resetFields()
-    },
-    queryData () {
-      getDataList(this.queryParam)
+    getData (parameter) {
+      return getDataList(Object.assign(parameter, this.queryParam))
         .then(res => {
           res.result.data.map((val) => {
             val['editable'] = false
           })
           return res.result
         })
+    },
+    clearSubmit () {
+      this.form.resetFields()
     },
     onChange (date, dateString) {
       this.queryParam.date = {
@@ -340,7 +341,6 @@ export default {
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
-        console.log(values)
         if (!err) {
           this.$http.post('/machining', values).then(res => {
             if (res.status === 'success') {
@@ -351,7 +351,11 @@ export default {
         }
       })
     },
-
+    deleteOption (url, data) {
+      this.$http.delete(url, data).then(res => {
+        console.log(res)
+      })
+    },
     handleChange (value, key, column, record) {
       console.log(value, key, column)
       record[column.dataIndex] = value
@@ -363,7 +367,9 @@ export default {
     },
     // eslint-disable-next-line
     del (row) {
-      console.log(row)
+      const $this = this
+      const delData = JSON.stringify({ key: row.key })
+      console.log(delData)
       this.$confirm({
         title: '警告',
         content: `真的要删除此条信息吗?`,
@@ -371,11 +377,13 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          console.log('OK')
           // 在这里调用删除接口
-          return new Promise((resolve, reject) => {
-            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000)
-          }).catch(() => console.log('Oops errors!'))
+          $this.$http.delete(`/machining?key=${row.key}`).then(res => {
+            if (res.status === 'success') {
+              $this.$message.info('删除成功！')
+              $this.$refs.table.refresh()
+            }
+          })
         },
         onCancel () {
           console.log('Cancel')
