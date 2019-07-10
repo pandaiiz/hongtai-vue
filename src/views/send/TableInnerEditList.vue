@@ -1,18 +1,23 @@
 <template>
   <a-card :bordered="false">
     <a-row :span="24">
-      <a-range-picker v-model="queryParam.date"/>
-      <a-select defaultValue="lucy" style="width: 120px;margin-left: 8px" v-model="queryParam.department">
-        <a-select-option v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-select-option>
-      </a-select>
-      <a-button style="margin-left: 8px" @click="() => queryParam = {}">重置</a-button>
-      <a-button style="margin-left: 8px" type="primary" @click="$refs.table.refresh(true)">
-        <a-icon type="search" /> 查询
-      </a-button>
-      <a-button style="margin-left: 8px" type="primary" @click="showDrawer">
-        <a-icon type="plus" /> 新增
-      </a-button>
+      <a-col :span="24">
+        <a-range-picker v-model="queryParam.date"/>
+        <a-select defaultValue="lucy" style="width: 120px;margin-left: 8px" v-model="queryParam.department">
+          <a-select-option v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-select-option>
+        </a-select>
+        <a-button style="margin-left: 8px" type="danger" @click="() => queryParam = {}">
+          <a-icon type="redo" />重置
+        </a-button>
+        <a-button style="margin-left: 8px" type="default" @click="$refs.table.refresh(true)">
+          <a-icon type="search" /> 查询
+        </a-button>
+        <a-button style="margin-left: 8px" type="primary" @click="showDrawer">
+          <a-icon type="plus" /> 新增
+        </a-button>
+      </a-col>
     </a-row>
+    <br />
     <s-table
       ref="table"
       size="middle"
@@ -40,8 +45,10 @@
             </a-popconfirm>
           </span>
           <span v-else>
-            <!-- <a class="edit" @click="() => edit(record)">修改</a> -->
-            <!-- <a-divider type="vertical" /> -->
+            <!-- <a class="edit" @click="() => edit(record)">修改</a>
+            <a-divider type="vertical" /> -->
+            <a class="fill" @click="() => fill(record)">填充</a>
+            <a-divider type="vertical" />
             <a class="delete" @click="() => del(record)">删除</a>
           </span>
         </div>
@@ -80,15 +87,15 @@
           </a-col>
           <a-col :span="12">
             <a-form-item label="重量">
-              <a-input-search
+              <a-input
                 v-decorator="[
                   'weight', // 给表单赋值或拉取表单时，该input对应的key
                   {rules: [{ required: true, message: '请读取重量' }]}
                 ]"
                 placeholder="请读取重量"
                 size="default">
-                <a-button slot="enterButton">读称</a-button>
-              </a-input-search>
+                <a-icon slot="addonAfter" type="setting" @click="readWeight"/>
+              </a-input>
             </a-form-item>
           </a-col>
           <a-col :span="12">
@@ -108,7 +115,8 @@
               <a-radio-group
                 buttonStyle="solid"
                 v-decorator="[
-                  'department'
+                  'department',
+                  {rules: [{ required: true, message: '请选择部门' }]}
                 ]">
                 <a-radio-button v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
@@ -119,7 +127,8 @@
               <a-radio-group
                 buttonStyle="solid"
                 v-decorator="[
-                  'category'
+                  'category',
+                  {rules: [{ required: true, message: '请选择类别' }]}
                 ]">
                 <a-radio-button v-for="item in listData.category" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
@@ -130,7 +139,8 @@
               <a-radio-group
                 buttonStyle="solid"
                 v-decorator="[
-                  'quality'
+                  'quality',
+                  {rules: [{ required: true, message: '请选择成色' }]}
                 ]">
                 <a-radio-button v-for="item in listData.quality" :key="item.name" :value="item.name">{{ item.name }}</a-radio-button>
               </a-radio-group>
@@ -141,7 +151,8 @@
               <a-radio-group
                 buttonStyle="solid"
                 v-decorator="[
-                  'product'
+                  'product',
+                  {rules: [{ required: true, message: '请选择产品' }]}
                 ]">
                 <a-radio-button v-for="item in listData.product" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
@@ -178,12 +189,10 @@
             @click="onClose">
             补录
           </a-button> -->
-          <a-button
-            :style="{marginRight: '8px'}"
-            @click="clearSubmit">
+          <a-button :style="{marginRight: '8px'}" @click="clearSubmit" type="danger">
             重置
           </a-button>
-          <a-button :style="{marginRight: '8px'}" @click="onClose" type="primary">
+          <a-button :style="{marginRight: '8px'}" @click="onClose" type="default">
             关闭
           </a-button>
           <a-button html-type="submit" type="primary">提交</a-button>
@@ -212,6 +221,7 @@ export default {
       // 查询参数
       queryParam: {},
       submitParam: {},
+      weight: '',
       form: this.$form.createForm(this),
       listData: {},
       // 表头
@@ -305,6 +315,16 @@ export default {
     this.loadList()
   },
   methods: {
+    readWeight (value) {
+      this.form.setFieldsValue({
+        weight: '读取中...'
+      })
+      this.$http.get('/collecter/weight').then(res => {
+        this.form.setFieldsValue({
+          weight: res.weight
+        })
+      })
+    },
     getData (parameter) {
       return getDataList(Object.assign(parameter, this.queryParam))
         .then(res => {
@@ -335,41 +355,48 @@ export default {
           this.listData = res
         })
     },
-    submitList () {
-      console.log(this.submitParam)
-    },
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$http.post('/machining', values).then(res => {
+          this.$http.post('/api/machining', values).then(res => {
             if (res.status === 'success') {
               this.$message.info('新增成功！')
+              this.visible = false
+              this.form.resetFields()
               this.$refs.table.refresh()
             }
           })
         }
       })
     },
-    deleteOption (url, data) {
-      this.$http.delete(url, data).then(res => {
-        console.log(res)
-      })
-    },
     handleChange (value, key, column, record) {
-      console.log(value, key, column)
       record[column.dataIndex] = value
     },
+    fill (row) {
+      this.visible = true
+      setTimeout(() => {
+        this.form.setFieldsValue({
+          id: row.id,
+          number: row.number,
+          weight: row.weight,
+          remarks: row.remarks,
+          department: row.department,
+          category: row.category,
+          quality: row.quality,
+          product: row.product,
+          type: row.type
+        })
+      }, 0)
+    },
     edit (row) {
-      console.log(row)
       row.editable = true
+      console.log(row)
       // row = Object.assign({}, row)
     },
     // eslint-disable-next-line
     del (row) {
       const $this = this
-      const delData = JSON.stringify({ key: row.key })
-      console.log(delData)
       this.$confirm({
         title: '警告',
         content: `真的要删除此条信息吗?`,
@@ -378,7 +405,7 @@ export default {
         cancelText: '取消',
         onOk () {
           // 在这里调用删除接口
-          $this.$http.delete(`/machining?key=${row.key}`).then(res => {
+          $this.$http.delete(`/api/machining?key=${row.key}`).then(res => {
             if (res.status === 'success') {
               $this.$message.info('删除成功！')
               $this.$refs.table.refresh()
@@ -391,7 +418,17 @@ export default {
       })
     },
     save (row) {
+      console.log(row)
       row.editable = false
+      this.$http.put('/api/machining', row).then(res => {
+        console.log(res)
+        if (res.status === 'success') {
+          this.$message.info('修改成功！')
+          // this.visible = false
+          // this.form.resetFields()
+          // this.$refs.table.refresh()
+        }
+      })
     },
     cancel (row) {
       row.editable = false
