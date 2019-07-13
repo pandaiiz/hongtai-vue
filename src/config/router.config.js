@@ -60,19 +60,13 @@ export const asyncRouterMap = [
         name: 'setting',
         component: RouteView,
         redirect: '/setting/basic',
-        meta: { title: '系统设置', icon: 'profile', permission: [ 'profile' ] },
+        meta: { title: '系统设置', icon: 'setting', permission: [ 'profile' ] },
         children: [
           {
             path: '/setting/basic',
             name: 'BasicSetting',
             component: () => import('@/views/setting/Basic'),
             meta: { title: '基础配置', permission: [ 'profile' ] }
-          },
-          {
-            path: '/report/day',
-            name: 'ReportDay',
-            component: () => import('@/views/report/day/ReportDay'),
-            meta: { title: '每日', permission: [ 'profile' ] }
           }
         ]
       }

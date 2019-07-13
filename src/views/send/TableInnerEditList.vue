@@ -2,7 +2,10 @@
   <a-card :bordered="false">
     <a-row :span="24">
       <a-col :span="24">
-        <a-range-picker v-model="queryParam.date"/>
+        <a-range-picker
+          v-model="queryParam.date"
+          :format="dateFormat"
+        />
         <a-select defaultValue="lucy" style="width: 120px;margin-left: 8px" v-model="queryParam.department">
           <a-select-option v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-select-option>
         </a-select>
@@ -215,11 +218,14 @@ export default {
   },
   data () {
     return {
+      dateFormat: 'YYYY/MM/DD',
       visible: false,
       // 高级搜索 展开/关闭
       advanced: true,
       // 查询参数
-      queryParam: {},
+      queryParam: {
+        date: [moment(), moment()]
+      },
       submitParam: {},
       weight: '',
       form: this.$form.createForm(this),
@@ -315,14 +321,21 @@ export default {
     this.loadList()
   },
   methods: {
-    readWeight (value) {
+    moment,
+    readWeight () {
       this.form.setFieldsValue({
         weight: '读取中...'
       })
       this.$http.get('/collecter/weight').then(res => {
-        this.form.setFieldsValue({
-          weight: res.weight
-        })
+        if (res.state === 'error') {
+          setTimeout(() => {
+            this.readWeight()
+          }, 1000)
+        } else {
+          this.form.setFieldsValue({
+            weight: res.weight
+          })
+        }
       })
     },
     getData (parameter) {
@@ -345,6 +358,11 @@ export default {
     },
     showDrawer () {
       this.visible = true
+      setTimeout(() => {
+        this.form.setFieldsValue({
+          id: 9999
+        })
+      }, 0)
     },
     onClose () {
       this.visible = false
@@ -358,6 +376,9 @@ export default {
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
+        if (!values.remarks) {
+          values.remarks = ''
+        }
         if (!err) {
           this.$http.post('/api/machining', values).then(res => {
             if (res.status === 'success') {
@@ -391,7 +412,6 @@ export default {
     },
     edit (row) {
       row.editable = true
-      console.log(row)
       // row = Object.assign({}, row)
     },
     // eslint-disable-next-line
@@ -418,7 +438,6 @@ export default {
       })
     },
     save (row) {
-      console.log(row)
       row.editable = false
       this.$http.put('/api/machining', row).then(res => {
         console.log(res)
