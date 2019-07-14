@@ -125,7 +125,7 @@ export const asyncRouterMap = [
       //       meta: { title: '高级表单', keepAlive: true, permission: [ 'form' ] }
       //     }
       //   ]
-      // },
+      // }
 
       // list
       // {

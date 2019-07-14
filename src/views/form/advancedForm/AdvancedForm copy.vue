@@ -1,5 +1,12 @@
 <template>
   <div>
+    <a-card class="card" title="仓库管理" :bordered="false">
+      <repository-form ref="repository" :showSubmit="false" />
+    </a-card>
+    <a-card class="card" title="任务管理" :bordered="false">
+      <task-form ref="task" :showSubmit="false" />
+    </a-card>
+
     <!-- table -->
     <a-card>
       <a-table
@@ -45,12 +52,57 @@
       </a-table>
       <a-button style="width: 100%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newMember">新增成员</a-button>
     </a-card>
+
+    <!-- fixed footer toolbar -->
+    <footer-tool-bar :style="{ width: isSideMenu() && isDesktop() ? `calc(100% - ${sidebarOpened ? 256 : 80}px)` : '100%'}">
+      <span class="popover-wrapper">
+        <a-popover title="表单校验信息" overlayClassName="antd-pro-pages-forms-style-errorPopover" trigger="click" :getPopupContainer="trigger => trigger.parentNode">
+          <template slot="content">
+            <li v-for="item in errors" :key="item.key" @click="scrollToField(item.key)" class="antd-pro-pages-forms-style-errorListItem">
+              <a-icon type="cross-circle-o" class="antd-pro-pages-forms-style-errorIcon" />
+              <div class="">{{ item.message }}</div>
+              <div class="antd-pro-pages-forms-style-errorField">{{ item.fieldLabel }}</div>
+            </li>
+          </template>
+          <span class="antd-pro-pages-forms-style-errorIcon" v-if="errors.length > 0">
+            <a-icon type="exclamation-circle" />{{ errors.length }}
+          </span>
+        </a-popover>
+      </span>
+      <a-button type="primary" @click="validate" :loading="loading">提交</a-button>
+    </footer-tool-bar>
   </div>
 </template>
 
 <script>
+import RepositoryForm from './RepositoryForm'
+import TaskForm from './TaskForm'
+import FooterToolBar from '@/components/FooterToolbar'
+import { mixin, mixinDevice } from '@/utils/mixin'
+
+const fieldLabels = {
+  name: '仓库名',
+  url: '仓库域名',
+  owner: '仓库管理员',
+  approver: '审批人',
+  dateRange: '生效日期',
+  type: '仓库类型',
+  name2: '任务名',
+  url2: '任务描述',
+  owner2: '执行人',
+  approver2: '责任人',
+  dateRange2: '生效日期',
+  type2: '任务类型'
+}
 
 export default {
+  name: 'AdvancedForm',
+  mixins: [mixin, mixinDevice],
+  components: {
+    FooterToolBar,
+    RepositoryForm,
+    TaskForm
+  },
   data () {
     return {
       description: '高级表单常见于一次性输入和提交大批量数据的场景。',
@@ -114,6 +166,9 @@ export default {
     }
   },
   methods: {
+    handleSubmit (e) {
+      e.preventDefault()
+    },
     newMember () {
       const length = this.data.length
       this.data.push({
@@ -162,12 +217,72 @@ export default {
       target.editable = false
     },
     handleChange (value, key, column) {
-      console.log(value, key, column)
       const newData = [...this.data]
       const target = newData.filter(item => key === item.key)[0]
       if (target) {
         target[column] = value
         this.data = newData
+      }
+    },
+
+    // 最终全页面提交
+    validate () {
+      console.log(this.data)
+      const { $refs: { repository, task }, $notification } = this
+      const repositoryForm = new Promise((resolve, reject) => {
+        repository.form.validateFields((err, values) => {
+          if (err) {
+            reject(err)
+            return
+          }
+          resolve(values)
+        })
+      })
+      const taskForm = new Promise((resolve, reject) => {
+        task.form.validateFields((err, values) => {
+          if (err) {
+            reject(err)
+            return
+          }
+          resolve(values)
+        })
+      })
+
+      // clean this.errors
+      this.errors = []
+      Promise.all([repositoryForm, taskForm]).then(values => {
+        console.log(values)
+        $notification['error']({
+          message: 'Received values of form:',
+          description: JSON.stringify(values)
+        })
+      }).catch(() => {
+        const errors = Object.assign({}, repository.form.getFieldsError(), task.form.getFieldsError())
+        const tmp = { ...errors }
+        this.errorList(tmp)
+        console.log(tmp)
+      })
+    },
+    errorList (errors) {
+      if (!errors || errors.length === 0) {
+        return null
+      }
+      this.errors = Object.keys(errors).map(key => {
+        if (!errors[key]) {
+          return null
+        }
+
+        return {
+          key: key,
+          message: errors[key][0],
+          fieldLabel: fieldLabels[key]
+        }
+      })
+    },
+    scrollToField (fieldKey) {
+      const labelNode = document.querySelector(`label[for="${fieldKey}"]`)
+      if (labelNode) {
+        labelNode.scrollIntoView(true)
       }
     }
   }

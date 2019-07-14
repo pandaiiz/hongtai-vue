@@ -27,8 +27,8 @@
       :scroll="{ x : true }"
       :columns="columns"
       :data="loadData">
-      <template v-for="(col, index) in columns" v-if="col.scopedSlots" :slot="col.dataIndex" slot-scope="text, record">
-        <div :key="index">
+      <template v-for="(col, index) in columns" :slot="col.dataIndex" slot-scope="text, record">
+        <div :key="index" v-if="col.scopedSlots">
           <a-input
             v-if="record.editable"
             style="margin: -5px 0"

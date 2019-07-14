@@ -8,11 +8,23 @@
     >
       <p>
         <template v-for="(item, key) in currentContent">
-          <a-popconfirm v-if="noTitleKey !== 'quality'" :key="key" title="确认要删除吗？" @confirm="deleteOption(item)" okText="是" cancelText="否">
+          <a-popconfirm
+            v-if="noTitleKey !== 'quality'"
+            :key="key"
+            title="确认要删除吗？"
+            @confirm="deleteOption(item)"
+            okText="是"
+            cancelText="否">
             <a-icon slot="icon" type="question-circle-o" style="color: blue" />
             <a-button style="margin-right: 8px;" href="#">{{ item }}</a-button>
           </a-popconfirm>
-          <a-popconfirm v-else-if="noTitleKey === 'quality'" :key="key" title="确认要删除吗？" @confirm="deleteOption(item.name)" okText="是" cancelText="否">
+          <a-popconfirm
+            v-else-if="noTitleKey === 'quality'"
+            :key="key"
+            title="确认要删除吗？"
+            @confirm="deleteOption(item.name)"
+            okText="是"
+            cancelText="否">
             <a-icon slot="icon" type="question-circle-o" style="color: blue" />
             <a-button style="margin-right: 8px;" href="#">{{ item.name }}({{ item.percent }}%)</a-button>
           </a-popconfirm>
