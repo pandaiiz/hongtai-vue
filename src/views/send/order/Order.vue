@@ -70,13 +70,11 @@
             >
               <a-radio-group
                 buttonStyle="solid"
-                v-for="item in typeOption"
-                :key="item"
                 v-decorator="[
                   'orderType', // 给表单赋值或拉取表单时，该input对应的key
                   {rules: [{ required: true, message: '请选择订单类型' }]}
                 ]">
-                <a-radio-button :value="item">{{ item }}</a-radio-button>
+                <a-radio-button v-for="item in typeOption" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
             <a-form-item
@@ -85,14 +83,15 @@
             >
             </a-form-item>
           </a-col>
-          <a-col :span="24">
+          <!-- <a-col :span="24">
             <a-form-item :wrapper-col="{ span: 6,offset: 20 }">
               <a-button type="primary" html-type="submit" style="margin-left: 8px;">提交</a-button>
             </a-form-item>
-          </a-col>
+          </a-col> -->
         </a-row>
       </a-form>
       <a-table
+        size="middle"
         :columns="columns"
         :dataSource="data"
         :pagination="false"
@@ -103,7 +102,6 @@
             v-if="record.editable"
             style="margin: -5px 0"
             :value="text"
-            :placeholder="columns[i].title"
             @change="e => handleChange(e.target.value, record.key, col)"
           />
           <template v-else>{{ text }}</template>
@@ -140,7 +138,6 @@
 
 <script>
 import moment from 'moment'
-import { getInfoList } from '@/api/manage'
 export default {
   data () {
     return {
@@ -154,80 +151,66 @@ export default {
           title: '订单号',
           dataIndex: 'orderId',
           key: 'orderId',
+          align: 'center',
           scopedSlots: { customRender: 'orderId' }
         },
         {
           title: '货品名称',
           dataIndex: 'productName',
           key: 'productName',
+          align: 'center',
           scopedSlots: { customRender: 'productName' }
         },
         {
           title: '成色',
           dataIndex: 'quality',
           key: 'quality',
+          align: 'center',
           scopedSlots: { customRender: 'quality' }
         },
         {
           title: '数量',
           dataIndex: 'number',
           key: 'number',
+          align: 'center',
           scopedSlots: { customRender: 'number' }
         },
         {
           title: '质量',
           dataIndex: 'weight',
           key: 'weight',
+          align: 'center',
           scopedSlots: { customRender: 'weight' }
         },
         {
           title: '单价',
           dataIndex: 'unitPrice',
           key: 'unitPrice',
+          align: 'center',
           scopedSlots: { customRender: 'unitPrice' }
         },
         {
           title: '合计工费',
           dataIndex: 'pay',
           key: 'pay',
+          align: 'center',
           scopedSlots: { customRender: 'pay' }
         },
         {
           title: '备注',
           dataIndex: 'remarks',
           key: 'remarks',
+          align: 'center',
           scopedSlots: { customRender: 'remarks' }
         },
         {
           title: '操作',
           key: 'action',
+          align: 'center',
           scopedSlots: { customRender: 'operation' }
         }
       ],
       data: [],
-      // data: [
-      //   {
-      //     key: '1',
-      //     name: '小明',
-      //     workId: '001',
-      //     editable: false,
-      //     department: '行政部'
-      //   },
-      //   {
-      //     key: '2',
-      //     name: '李莉',
-      //     workId: '002',
-      //     editable: false,
-      //     department: 'IT部'
-      //   },
-      //   {
-      //     key: '3',
-      //     name: '王小帅',
-      //     workId: '003',
-      //     editable: false,
-      //     department: '财务部'
-      //   }
-      // ],
 
       errors: []
     }
@@ -235,16 +218,19 @@ export default {
   beforeCreate () {
     this.form = this.$form.createForm(this)
   },
+  created () {
+    console.log('123213')
+    this.getOrderOption()
+  },
   mounted () {
     this.form.setFieldsValue({
       date: moment()
     })
-    getInfoList()
-      .then(res => {
-        this.typeOption = res.order
-      })
   },
   methods: {
+    getOrderOption () {
+      this.$http.get('/api/list').then(res => { this.typeOption = res.order })
+    },
     moment,
     handleSubmit (e) {
       e.preventDefault()
@@ -389,5 +375,8 @@ export default {
       color: rgba(0,0,0,.45);
       font-size: 12px;
     }
+  }
+  .ant-table-tbody > tr > td > span {
+    white-space: nowrap;
   }
 </style>

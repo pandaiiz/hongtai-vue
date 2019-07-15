@@ -1,6 +1,6 @@
 <template>
   <div class="logo">
-    <router-link :to="{name:'dashboard'}">
+    <router-link :to="{name:'index'}">
       <!-- <LogoSvg alt="logo" /> -->
       <img src="@/assets/logo.png" alt="" srcset="">
       <h1 v-if="showTitle">{{ title }}</h1>

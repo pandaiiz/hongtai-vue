@@ -319,6 +319,7 @@ export default {
   },
   created () {
     this.loadList()
+    console.log('123123')
   },
   methods: {
     moment,
@@ -457,6 +458,11 @@ export default {
     }
   },
   watch: {
+    '$route': {
+      handler (route) {
+        console.log(route)
+      }
+    }
     /*
       'selectedRows': function (selectedRows) {
         this.needTotalList = this.needTotalList.map(item => {
