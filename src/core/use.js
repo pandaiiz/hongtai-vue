@@ -14,6 +14,8 @@ import PermissionHelper from '@/utils/helper/permission'
 // import '@/components/use'
 import './directives/action'
 
+import Print from 'vue-print-nb'
+
 VueClipboard.config.autoSetContainer = true
 
 Vue.use(Antd)
@@ -23,3 +25,4 @@ Vue.use(VueStorage, config.storageOptions)
 Vue.use(VueClipboard)
 Vue.use(PermissionHelper)
 Vue.use(VueCropper)
+Vue.use(Print)

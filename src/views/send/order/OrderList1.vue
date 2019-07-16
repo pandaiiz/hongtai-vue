@@ -60,7 +60,7 @@
 
     <a-drawer
       title="新建收发"
-      :width="900"
+      :width="720"
       @close="onClose"
       :visible="visible"
       :wrapStyle="{height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px'}">
@@ -440,9 +440,6 @@ export default {
         console.log(res)
         if (res.status === 'success') {
           this.$message.info('修改成功！')
-          // this.visible = false
-          // this.form.resetFields()
-          // this.$refs.table.refresh()
         }
       })
     },

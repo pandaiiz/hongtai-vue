@@ -77,17 +77,38 @@
                 <a-radio-button v-for="item in typeOption" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
+          </a-col>
+          <a-col :span="12">
             <a-form-item
-              :label-col="{ span: 2 }"
-              :wrapper-col="{ span: 22 }"
+              label="总价"
+              :label-col="{ span: 4 }"
+              :wrapper-col="{ span: 20 }"
             >
+              <a-input
+                :disabled="true"
+                v-decorator="[
+                  'totalPay', // 给表单赋值或拉取表单时，该input对应的key
+                ]"/>
             </a-form-item>
           </a-col>
-          <!-- <a-col :span="24">
+          <a-col :span="12">
+            <a-form-item
+              label="总重量"
+              :label-col="{ span: 4 }"
+              :wrapper-col="{ span: 20 }"
+            >
+              <a-input
+                :disabled="true"
+                v-decorator="[
+                  'totalWeight',
+                ]"/>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
             <a-form-item :wrapper-col="{ span: 6,offset: 20 }">
               <a-button type="primary" html-type="submit" style="margin-left: 8px;">提交</a-button>
             </a-form-item>
-          </a-col> -->
+          </a-col>
         </a-row>
       </a-form>
       <a-table
@@ -97,9 +118,12 @@
         :pagination="false"
         :loading="memberLoading">
         <template v-for="(col, i) in ['orderId', 'productName', 'quality', 'number', 'weight', 'unitPrice', 'pay', 'remarks']" :slot="col" slot-scope="text, record">
+          <a-select :key="col" style="width: 70px" v-if="record.editable && col == 'quality'" :value="text" @change="e => handleChange(e, record.key, col)">
+            <a-select-option v-for="(quality, index) in qualityOption" :key="index" :value="quality.name">{{ quality.name }}</a-select-option>
+          </a-select>
           <a-input
             :key="col"
-            v-if="record.editable"
+            v-else-if="record.editable && col !== 'quality'"
             style="margin: -5px 0"
             :value="text"
             @change="e => handleChange(e.target.value, record.key, col)"
@@ -130,9 +154,29 @@
           </span>
         </template>
       </a-table>
-      <a-button style="width: 20%; margin-top: 16px; margin-bottom: 8px; margin-right: 8px" icon="save" @click="saveOrder">保存</a-button>
       <a-button v-if="this.data.length < 6" style="width: 20%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newMember">新增</a-button>
     </a-card>
+    <template>
+      <div>
+        <a-button type="primary" @click="showPrint">预览</a-button>
+        <a-modal title="打印预览" v-model="visible" :bodyStyle="{ width: '800px' }">
+          <template slot="footer">
+            <a-button key="back" @click="closePrint">关闭</a-button>
+            <a-button v-print="'#printMe'" type="primary" :loading="loading">
+              打印
+            </a-button>
+          </template>
+          <div id="printMe">
+            <p>葫芦娃，葫芦娃</p>
+            <p>一根藤上七朵花</p>
+            <p>小小树藤是我家啦啦啦啦</p>
+            <p>叮当当咚咚当当浇不大</p>
+            <p> 叮当当咚咚当当是我家</p>
+            <p> 啦啦啦啦</p>
+          </div>
+        </a-modal>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -141,7 +185,9 @@ import moment from 'moment'
 export default {
   data () {
     return {
+      visible: false,
       typeOption: {},
+      qualityOption: {},
       dateFormat: 'YYYY/MM/DD',
       loading: false,
       memberLoading: false,
@@ -169,14 +215,14 @@ export default {
           scopedSlots: { customRender: 'quality' }
         },
         {
-          title: '数量',
+          title: '数量(件)',
           dataIndex: 'number',
           key: 'number',
           align: 'center',
           scopedSlots: { customRender: 'number' }
         },
         {
-          title: '质量',
+          title: '重量(g)',
           dataIndex: 'weight',
           key: 'weight',
           align: 'center',
@@ -219,8 +265,7 @@ export default {
     this.form = this.$form.createForm(this)
   },
   created () {
-    console.log('123213')
-    this.getOrderOption()
+    this.$http.get('/api/list').then(res => { this.typeOption = res.order; this.qualityOption = res.quality })
   },
   mounted () {
     this.form.setFieldsValue({
@@ -228,20 +273,47 @@ export default {
     })
   },
   methods: {
-    getOrderOption () {
-      this.$http.get('/api/list').then(res => { this.typeOption = res.order })
+    handleOk (e) {
+      this.loading = true
+      setTimeout(() => {
+        this.visible = false
+        this.loading = false
+      }, 3000)
+    },
+    closePrint (e) {
+      this.visible = false
+    },
+    showPrint () {
+      this.visible = true
+    },
+    printOrder (e) {
+      this.visible = false
     },
     moment,
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          console.log('Received values of form: ', values)
+          const dataList = []
+          this.data.map((value) => {
+            if (value.editable) {
+              this.$message.error('请先保存条目！')
+              return
+            }
+            dataList.push(value)
+          })
+          values.info = JSON.stringify(dataList)
+          this.$http.post('/api/order', values).then(res => {
+            console.log(res)
+            // if (res.status === 'success') {
+            //   this.$message.info('新增成功！')
+            //   this.visible = false
+            //   this.form.resetFields()
+            //   this.$refs.table.refresh()
+            // }
+          })
         }
       })
-    },
-    saveOrder () {
-      console.log(this.data)
     },
     newMember () {
       const length = this.data.length
@@ -265,11 +337,31 @@ export default {
       this.data = newData
     },
     saveRow (record) {
+      let totalPay = 0
+      let totalWeight = 0
+      this.data.map((value) => {
+        totalPay += parseFloat(value.pay)
+        totalWeight += parseFloat(value.weight)
+      })
+      this.form.setFieldsValue({
+        totalPay: totalPay,
+        totalWeight: totalWeight
+      })
       this.memberLoading = true
-      const { key, orderId, productName, quality } = record
-      if (!orderId || !productName || !quality) {
+      const { key, productName, quality, weight } = record
+      if (!productName) {
         this.memberLoading = false
-        this.$message.error('请填写完整成员信息。')
+        this.$message.warning('请填写产品名称！')
+        return
+      }
+      if (!quality) {
+        this.memberLoading = false
+        this.$message.warning('请填写成色！')
+        return
+      }
+      if (!weight) {
+        this.memberLoading = false
+        this.$message.warning('请填写重量！')
         return
       }
       const target = this.data.filter(item => item.key === key)[0]
@@ -301,6 +393,7 @@ export default {
       target.editable = false
     },
     handleChange (value, key, column) {
+      console.log(value, key, column)
       const newData = [...this.data]
       const target = newData.filter(item => key === item.key)[0]
       if (column === 'weight') {

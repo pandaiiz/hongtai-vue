@@ -25,9 +25,9 @@ export const asyncRouterMap = [
             meta: { title: '收发管理', keepAlive: false }
           },
           {
-            path: '/send/order',
+            path: '/send/orderlist',
             name: 'InAndOutOrder',
-            component: () => import('@/views/send/order/Order'),
+            component: () => import('@/views/send/order/OrderList'),
             meta: { title: '出入库单', keepAlive: false }
           }
         ]
@@ -64,9 +64,15 @@ export const asyncRouterMap = [
         children: [
           {
             path: '/setting/basic',
-            name: 'BasicSetting',
+            name: 'Basic',
             component: () => import('@/views/setting/Basic'),
             meta: { title: '基础配置', permission: [ 'profile' ] }
+          },
+          {
+            path: '/setting/customer',
+            name: 'CustomerInput',
+            component: () => import('@/views/setting/CustomerInput'),
+            meta: { title: '客户录入', permission: [ 'profile' ] }
           }
         ]
       }
