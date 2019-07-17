@@ -165,7 +165,7 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
-          <a-col :span="24">
+          <a-col :span="12">
             <a-form-item label="类型">
               <a-radio-group
                 buttonStyle="solid"
@@ -176,6 +176,14 @@
                 <a-radio-button value="send">发货</a-radio-button>
                 <a-radio-button value="receive">收货</a-radio-button>
               </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12" v-if="supplementDate">
+            <a-form-item label="补录日期">
+              <a-date-picker
+                v-decorator="[
+                  'supplementDate'
+                ]"/>
             </a-form-item>
           </a-col>
         </a-row>
@@ -191,11 +199,11 @@
             textAlign: 'right',
           }"
         >
-          <!-- <a-button
+          <a-button
             :style="{marginRight: '8px'}"
-            @click="onClose">
+            @click="supplementData">
             补录
-          </a-button> -->
+          </a-button>
           <a-button :style="{marginRight: '8px'}" @click="clearSubmit" type="danger">
             重置
           </a-button>
@@ -224,6 +232,7 @@ export default {
     return {
       dateFormat: 'YYYY/MM/DD',
       visible: false,
+      supplementDate: false,
       // 高级搜索 展开/关闭
       advanced: true,
       // 查询参数
@@ -325,7 +334,6 @@ export default {
   created () {
     const port = window.localStorage.getItem('port')
     this.balancePort = port
-    console.log(port)
     getInfoList()
       .then(res => {
         this.listData = res
@@ -333,6 +341,9 @@ export default {
   },
   methods: {
     moment,
+    supplementData () {
+      this.supplementDate = true
+    },
     setBalance (port) {
       this.balancePort = port
       window.localStorage.setItem('port', port)
@@ -364,6 +375,7 @@ export default {
     },
     clearSubmit () {
       this.form.resetFields()
+      this.supplementDate = false
     },
     onChange (date, dateString) {
       this.queryParam.date = {
