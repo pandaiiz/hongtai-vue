@@ -18,6 +18,10 @@
         <a-button style="margin-left: 8px" type="primary" @click="showDrawer">
           <a-icon type="plus" /> 新增
         </a-button>
+        <a-select style="margin-left: 8px" :value="balancePort" @change="setBalance">
+          <a-select-option value="port1">1号秤</a-select-option>
+          <a-select-option value="port2">2号秤</a-select-option>
+        </a-select>
       </a-col>
     </a-row>
     <br />
@@ -227,6 +231,7 @@ export default {
         date: [moment(), moment()]
       },
       submitParam: {},
+      balancePort: '',
       weight: '',
       form: this.$form.createForm(this),
       listData: {},
@@ -318,6 +323,9 @@ export default {
     }
   },
   created () {
+    const port = window.localStorage.getItem('port')
+    this.balancePort = port
+    console.log(port)
     getInfoList()
       .then(res => {
         this.listData = res
@@ -325,11 +333,15 @@ export default {
   },
   methods: {
     moment,
+    setBalance (port) {
+      this.balancePort = port
+      window.localStorage.setItem('port', port)
+    },
     readWeight () {
       this.form.setFieldsValue({
         weight: '读取中...'
       })
-      this.$http.get('/collecter/weight').then(res => {
+      this.$http.get(`/collecter/weight/${this.balancePort}`).then(res => {
         if (res.state === 'error') {
           setTimeout(() => {
             this.readWeight()
