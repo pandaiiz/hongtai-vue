@@ -2,7 +2,7 @@
   <div>
     <!-- table -->
     <a-card>
-      <a-form :form="form" @submit="handleSubmit">
+      <a-form :form="form">
         <a-row :gutter="8">
           <a-col :span="12">
             <a-form-item
@@ -104,11 +104,6 @@
                 ]"/>
             </a-form-item>
           </a-col>
-          <a-col :span="24">
-            <a-form-item :wrapper-col="{ span: 6,offset: 20 }">
-              <a-button type="primary" html-type="submit" style="margin-left: 8px;">提交</a-button>
-            </a-form-item>
-          </a-col>
         </a-row>
       </a-form>
       <a-table
@@ -154,11 +149,14 @@
           </span>
         </template>
       </a-table>
-      <a-button v-if="this.data.length < 6" style="width: 20%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newMember">新增</a-button>
+      <div style="margin-top: 16px; margin-bottom: 8px; float: right;">
+        <a-button v-if="this.data.length < 6" type="dashed" @click="newMember">新增</a-button>
+        <a-button @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
+      </div>
     </a-card>
     <template>
       <div>
-        <a-button type="primary" @click="showPrint">预览</a-button>
+        <!-- <a-button type="primary" @click="showPrint">预览</a-button> -->
         <a-modal title="打印预览" v-model="visible" :bodyStyle="{ width: '800px' }">
           <template slot="footer">
             <a-button key="back" @click="closePrint">关闭</a-button>

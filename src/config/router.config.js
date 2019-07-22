@@ -69,8 +69,14 @@ export const asyncRouterMap = [
             meta: { title: '基础配置', permission: [ 'profile' ] }
           },
           {
-            path: '/setting/customer',
-            name: 'CustomerInput',
+            path: '/setting/customer-list',
+            name: 'CustomerList',
+            component: () => import('@/views/setting/CustomerList'),
+            meta: { title: '客户列表', permission: [ 'profile' ] }
+          },
+          {
+            path: '/setting/customer-list',
+            name: 'CustomerList',
             component: () => import('@/views/setting/CustomerInput'),
             meta: { title: '客户录入', permission: [ 'profile' ] }
           }
@@ -111,7 +117,6 @@ export const constantRouterMap = [
       }
     ]
   },
-
   {
     path: '/test',
     component: BlankLayout,

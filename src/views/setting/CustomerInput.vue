@@ -1,6 +1,6 @@
 <template>
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
-    <a-form @submit="handleSubmit" :form="form">
+    <a-form :form="form">
       <a-form-item
         label="编码"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -48,12 +48,6 @@
           <a-radio-button value="supplier">供应商</a-radio-button>
           <a-radio-button value="customer">客户</a-radio-button>
         </a-radio-group>
-      </a-form-item>
-      <a-form-item
-        :wrapperCol="{ span: 24 }"
-        style="text-align: center"
-      >
-        <a-button htmlType="submit" type="primary">提交</a-button>
       </a-form-item>
     </a-form>
     <a-table
@@ -105,7 +99,10 @@
         </span>
       </template>
     </a-table>
-    <a-button v-if="this.data.length < 6" style="width: 20%; margin-top: 16px; margin-bottom: 8px" type="dashed" icon="plus" @click="newMember">新增</a-button>
+    <div style="margin-top: 16px; margin-bottom: 8px; float: right;">
+      <a-button type="dashed" @click="newMember">新增</a-button>
+      <a-button @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
+    </div>
   </a-card>
 </template>
 
@@ -171,6 +168,7 @@ export default {
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
+        console.log(values)
         if (!err) {
           const dataList = []
           this.data.map((value) => {

@@ -18,7 +18,7 @@
         <a-button style="margin-left: 8px" type="primary" @click="showDrawer">
           <a-icon type="plus" /> 新增
         </a-button>
-        <a-select style="margin-left: 8px" :value="balancePort" @change="setBalance">
+        <a-select style="margin-left: 8px" defaultValue="port1" :value="balancePort" @change="setBalance">
           <a-select-option value="port1">1号秤</a-select-option>
           <a-select-option value="port2">2号秤</a-select-option>
         </a-select>
