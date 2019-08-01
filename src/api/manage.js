@@ -2,6 +2,8 @@ import { axios } from '@/utils/request'
 
 const api = {
   data: '/api/machining',
+  order: '/api/order',
+  company: '/api/company',
   statistics: '/api/statistics',
   list: '/api/list',
   user: '/api/user',
@@ -13,6 +15,22 @@ const api = {
 }
 
 export default api
+
+export function getCompanyList (parameter) {
+  return axios({
+    url: api.company,
+    method: 'get',
+    params: parameter
+  })
+}
+
+export function getOrderList (parameter) {
+  return axios({
+    url: api.order,
+    method: 'get',
+    params: parameter
+  })
+}
 
 export function getDataList (parameter) {
   return axios({

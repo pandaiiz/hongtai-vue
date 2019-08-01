@@ -320,8 +320,10 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
+        console.log(Object.assign(parameter, this.queryParam))
         return getDataList(Object.assign(parameter, this.queryParam))
           .then(res => {
+            console.log(res)
             res.result.data.map((val) => {
               val['editable'] = false
             })

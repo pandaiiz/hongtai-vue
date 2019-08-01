@@ -25,10 +25,16 @@ export const asyncRouterMap = [
             meta: { title: '收发管理', keepAlive: false }
           },
           {
-            path: '/send/orderlist',
+            path: '/send/in-and-out',
             name: 'InAndOutOrder',
-            component: () => import('@/views/send/order/OrderList'),
+            component: () => import('@/views/send/order/InAndOutOrder'),
             meta: { title: '出入库单', keepAlive: false }
+          },
+          {
+            path: '/send/order-list',
+            name: 'OrderList',
+            component: () => import('@/views/send/order/OrderList'),
+            meta: { title: '出入库列表', keepAlive: false }
           }
         ]
       },
@@ -51,6 +57,18 @@ export const asyncRouterMap = [
             name: 'ReportDay',
             component: () => import('@/views/report/day/ReportDay'),
             meta: { title: '每日', permission: [ 'profile' ] }
+          },
+          {
+            path: '/report/customer',
+            name: 'ReportCustomer',
+            component: () => import('@/views/report/advanced/Advanced'),
+            meta: { title: '客户统计', permission: [ 'profile' ] }
+          },
+          {
+            path: '/report/warehouse',
+            name: 'ReportWarehouse',
+            component: () => import('@/views/report/advanced/Advanced'),
+            meta: { title: '仓库统计', permission: [ 'profile' ] }
           }
         ]
       },
@@ -72,11 +90,11 @@ export const asyncRouterMap = [
             path: '/setting/customer-list',
             name: 'CustomerList',
             component: () => import('@/views/setting/CustomerList'),
-            meta: { title: '客户列表', permission: [ 'profile' ] }
+            meta: { title: '客户列表', permission: [ 'profile' ], keepAlive: false }
           },
           {
-            path: '/setting/customer-list',
-            name: 'CustomerList',
+            path: '/setting/customer-input',
+            name: 'CustomerInput',
             component: () => import('@/views/setting/CustomerInput'),
             meta: { title: '客户录入', permission: [ 'profile' ] }
           }

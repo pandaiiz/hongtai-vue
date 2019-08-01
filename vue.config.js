@@ -96,13 +96,14 @@ module.exports = {
     port: 8000,
     proxy: {
       '/api': {
-        // target: 'http://192.168.123.100:4888',
-        target: 'http://localhost:4888',
+        target: 'http://192.168.123.100:4888',
+        // target: 'http://localhost:4888',
         ws: false,
         changeOrigin: true
       },
       '/collecter': {
-        target: 'http://localhost:4888',
+        target: 'http://192.168.123.100:4888',
+        // target: 'http://localhost:4888',
         ws: false,
         changeOrigin: true
       }
