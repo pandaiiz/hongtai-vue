@@ -16,7 +16,7 @@ export const asyncRouterMap = [
         name: 'send',
         redirect: '/send/edit-table',
         component: RouteView,
-        meta: { title: '信息录入', keepAlive: true, icon: 'edit', permission: [ 'profile' ] },
+        meta: { title: '收发', keepAlive: true, icon: 'edit', permission: [ 'profile' ] },
         children: [
           {
             path: '/send/send-receive',
@@ -24,6 +24,28 @@ export const asyncRouterMap = [
             component: () => import('@/views/send/TableInnerEditList'),
             meta: { title: '收发管理', keepAlive: false }
           },
+          {
+            path: '/report/day',
+            name: 'ReportDay',
+            component: () => import('@/views/report/day/ReportDay'),
+            meta: { title: '部门统计', permission: [ 'profile' ] }
+          },
+          {
+            path: '/report/warehouse',
+            name: 'ReportWarehouse',
+            component: () => import('@/views/report/advanced/Advanced'),
+            meta: { title: '仓库统计', permission: [ 'profile' ] }
+          }
+        ]
+      },
+      // report
+      {
+        path: '/report',
+        name: 'report',
+        component: RouteView,
+        redirect: '/report/basic',
+        meta: { title: '出入库', icon: 'profile', permission: [ 'profile' ] },
+        children: [
           {
             path: '/send/in-and-out',
             name: 'InAndOutOrder',
@@ -35,17 +57,7 @@ export const asyncRouterMap = [
             name: 'OrderList',
             component: () => import('@/views/send/order/OrderList'),
             meta: { title: '出入库列表', keepAlive: false }
-          }
-        ]
-      },
-      // report
-      {
-        path: '/report',
-        name: 'report',
-        component: RouteView,
-        redirect: '/report/basic',
-        meta: { title: '报表', icon: 'profile', permission: [ 'profile' ] },
-        children: [
+          },
           {
             path: '/report/total',
             name: 'ReportTotal',
@@ -53,22 +65,10 @@ export const asyncRouterMap = [
             meta: { title: '总计', permission: [ 'profile' ] }
           },
           {
-            path: '/report/day',
-            name: 'ReportDay',
-            component: () => import('@/views/report/day/ReportDay'),
-            meta: { title: '每日', permission: [ 'profile' ] }
-          },
-          {
             path: '/report/customer',
             name: 'ReportCustomer',
             component: () => import('@/views/report/advanced/Advanced'),
             meta: { title: '客户统计', permission: [ 'profile' ] }
-          },
-          {
-            path: '/report/warehouse',
-            name: 'ReportWarehouse',
-            component: () => import('@/views/report/advanced/Advanced'),
-            meta: { title: '仓库统计', permission: [ 'profile' ] }
           }
         ]
       },
@@ -87,16 +87,22 @@ export const asyncRouterMap = [
             meta: { title: '基础配置', permission: [ 'profile' ] }
           },
           {
+            path: '/setting/customer-input',
+            name: 'CustomerInput',
+            component: () => import('@/views/setting/CustomerInput'),
+            meta: { title: '客户录入', permission: [ 'profile' ] }
+          },
+          {
             path: '/setting/customer-list',
             name: 'CustomerList',
             component: () => import('@/views/setting/CustomerList'),
             meta: { title: '客户列表', permission: [ 'profile' ], keepAlive: false }
           },
           {
-            path: '/setting/customer-input',
-            name: 'CustomerInput',
-            component: () => import('@/views/setting/CustomerInput'),
-            meta: { title: '客户录入', permission: [ 'profile' ] }
+            path: '/setting/price-list',
+            name: 'PriceList',
+            component: () => import('@/views/setting/PriceList'),
+            meta: { title: '价格明细', permission: [ 'profile' ], keepAlive: false }
           }
         ]
       }

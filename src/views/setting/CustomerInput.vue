@@ -1,11 +1,17 @@
 <template>
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
+    <router-link to="/setting/customer-list">
+      <a-button type="primary">
+        <a-icon type="left" />客户列表
+      </a-button>
+    </router-link>
     <a-form :form="form">
       <a-form-item
         label="编码"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
+          :disabled="state"
           v-decorator="[
             'code',
             {rules: [{ required: true, message: '请输入客户' }]}
@@ -56,13 +62,12 @@
       :dataSource="data"
       :pagination="false"
       :loading="memberLoading">
-      <template v-for="(col, i) in ['quality', 'type', 'unitPrice', 'remarks']" :slot="col" slot-scope="text, record">
+      <template v-for="(col, i) in ['quality', 'name', 'unitPrice', 'remarks']" :slot="col" slot-scope="text, record">
         <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'quality'" :value="text" @change="e => handleChange(e, record.key, col)">
           <a-select-option v-for="(quality, index) in qualityOption" :key="index" :value="quality.name">{{ quality.name }}</a-select-option>
         </a-select>
-        <a-select :key="col" style="width: 100px" v-else-if="record.editable && col == 'type'" :value="text" @change="e => handleChange(e, record.key, col)">
-          <a-select-option value="cnc">CNC</a-select-option>
-          <a-select-option value="machine">机车</a-select-option>
+        <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'name'" :value="text" @change="e => handleChange(e, record.key, col)">
+          <a-select-option v-for="(product, index) in productOption" :key="index" :value="product">{{ product }}</a-select-option>
         </a-select>
         <a-input
           :key="col"
@@ -71,9 +76,7 @@
           :value="text"
           @change="e => handleChange(e.target.value, record.key, col)"
         />
-        <template v-else-if="text == 'machine'">机车</template>
-        <template v-else-if="text == 'cnc'">CNC</template>
-        <template v-else>{{ text }}</template>
+        <template v-else-if="!record.editable">{{ text }}</template>
       </template>
       <template slot="operation" slot-scope="text, record">
         <template v-if="record.editable">
@@ -86,8 +89,6 @@
           </span>
           <span v-else>
             <a @click="saveRow(record)">保存</a>
-            <a-divider type="vertical" />
-            <a @click="cancel(record.key)">取消</a>
           </span>
         </template>
         <span v-else>
@@ -111,9 +112,11 @@ export default {
   name: 'BaseForm',
   data () {
     return {
+      state: false,
       value: 1,
       typeOption: {},
       qualityOption: {},
+      productOption: {},
       dateFormat: 'YYYY/MM/DD',
       loading: false,
       memberLoading: false,
@@ -127,11 +130,11 @@ export default {
           scopedSlots: { customRender: 'quality' }
         },
         {
-          title: '类型',
-          dataIndex: 'type',
-          key: 'type',
+          title: '名称',
+          dataIndex: 'name',
+          key: 'name',
           align: 'center',
-          scopedSlots: { customRender: 'type' }
+          scopedSlots: { customRender: 'name' }
         },
         {
           title: '单价',
@@ -155,11 +158,39 @@ export default {
         }
       ],
       data: []
-
     }
   },
   created () {
-    this.$http.get('/api/list').then(res => { this.typeOption = res.order; this.qualityOption = res.quality })
+    this.$http.get('/api/list').then(res => { this.typeOption = res.order; this.qualityOption = res.quality; this.productOption = res.product })
+    // 判断页面类型，复制/新增/编辑
+    switch (this.$route.query.type) {
+      case 'edit':
+        this.state = true
+        if (this.$route.query.code) {
+          this.$http.get(`/api/company?code=${this.$route.query.code}`)
+            .then(res => {
+              this.data = JSON.parse(res.data[0].price_list)
+              this.form.setFieldsValue({
+                code: res.data[0].code,
+                name: res.data[0].name,
+                remarks: res.data[0].remarks,
+                type: res.data[0].type
+              })
+            })
+        }
+        break
+      case 'copy':
+        if (this.$route.query.code) {
+          this.$http.get(`/api/company?code=${this.$route.query.code}`)
+            .then(res => {
+              this.data = JSON.parse(res.data[0].price_list)
+              this.form.setFieldsValue({
+                type: res.data[0].type
+              })
+            })
+        }
+        break
+    }
   },
   beforeCreate () {
     this.form = this.$form.createForm(this)
@@ -168,24 +199,42 @@ export default {
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
-        console.log(values)
         if (!err) {
+          let flag = false
           const dataList = []
           this.data.map((value) => {
             if (value.editable) {
               this.$message.error('请先保存条目！')
+              flag = true
               return
             }
             dataList.push(value)
           })
+          if (flag) {
+            return
+          }
           values.priceList = JSON.stringify(dataList)
-          this.$http.post('/api/company', values).then(res => {
-            if (res.status === 'success') {
-              this.$message.info('新增成功！')
-              this.form.resetFields()
-              this.data = []
-            }
-          })
+          if (this.$route.query.type === 'edit') {
+            this.$http.put('/api/company', values).then(res => {
+              if (res.status === 'success') {
+                this.$message.info('更新成功！')
+              }
+            })
+          } else {
+            this.$http.get(`/api/company?code=${values.code}`).then(res => {
+              if (res.data.length > 0) {
+                this.$message.info('客户编码已存在，请修改！')
+                return false
+              }
+              this.$http.post('/api/company', values).then(res => {
+                if (res.status === 'success') {
+                  this.$message.info('提交成功！')
+                  this.form.resetFields()
+                  this.data = []
+                }
+              })
+            })
+          }
         }
       })
     },
@@ -207,15 +256,15 @@ export default {
     },
     saveRow (record) {
       this.memberLoading = true
-      const { key, quality, type, unitPrice } = record
+      const { key, quality, name, unitPrice } = record
       if (!quality) {
         this.memberLoading = false
         this.$message.warning('请填写成色！')
         return
       }
-      if (!type) {
+      if (!name) {
         this.memberLoading = false
-        this.$message.warning('请选择品名！')
+        this.$message.warning('请填写品名！')
         return
       }
       if (!unitPrice) {

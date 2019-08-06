@@ -4,12 +4,11 @@
       style="width:100%"
       :tabList="tabList"
       :activeTabKey="noTitleKey"
-      @tabChange="key => onTabChange(key)"
-    >
+      @tabChange="key => onTabChange(key)">
       <p>
         <template v-for="(item, key) in currentContent">
           <a-popconfirm
-            v-if="noTitleKey !== 'quality'"
+            v-if="noTitleKey !== 'quality' && noTitleKey !== 'price'"
             :key="key"
             title="确认要删除吗？"
             @confirm="deleteOption(item)"
@@ -29,7 +28,27 @@
             <a-button style="margin-right: 8px;" href="#">{{ item.name }}({{ item.percent }}%)</a-button>
           </a-popconfirm>
         </template>
-        <a-input-group compact style="margin-top: 24px;">
+        <template v-if="noTitleKey === 'price'">
+          <div>
+            <a-card
+              style="width:100%"
+              :tabList="priceTitle"
+              :activeTabKey="priceTitleKey"
+              @tabChange="key => priceTabChange(key, 'priceTitleKey')"
+            >
+              <a-transfer
+                :dataSource="priceData"
+                :titles="['可选', '表头']"
+                :targetKeys="targetKeys"
+                @change="handleChange"
+                @selectChange="handleSelectChange"
+                :render="item=>item.title"
+              />
+              <a-button @click="saveTargetHeader">保存</a-button>
+            </a-card>
+          </div>
+        </template>
+        <a-input-group compact style="margin-top: 24px;" v-if="noTitleKey !== 'price'">
           <a-input addonBefore="名称" style="width: 20%" v-model="addText">
             <a-icon v-if="addText" slot="addonAfter" @click="clearSubmitData" type="close"/>
           </a-input>
@@ -40,7 +59,7 @@
           </a-input>
           <span style="line-height: 32px;margin-left: 8px;">%</span>
         </a-input-group>
-        <a-button @click="submitData" style="margin-top: 24px;">新增</a-button>
+        <a-button v-if="noTitleKey !== 'price'" @click="submitData" style="margin-top: 24px;">新增</a-button>
       </p>
     </a-card>
   </div>
@@ -51,6 +70,8 @@ import { getInfoList } from '@/api/manage'
 export default {
   data () {
     return {
+      priceData: [],
+      targetKeys: [],
       addText: '',
       percentText: '',
       list: {},
@@ -60,15 +81,29 @@ export default {
         { key: 'category', tab: '类别' },
         { key: 'product', tab: '产品' },
         { key: 'quality', tab: '成色' },
-        { key: 'order', tab: '收发单品类' }
+        { key: 'order', tab: '收发单品类' },
+        { key: 'price', tab: '价格明细' }
       ],
-      noTitleKey: 'department'
+      priceTitle: [],
+      noTitleKey: '',
+      priceTitleKey: ''
     }
   },
   created () {
     getInfoList()
       .then(res => {
+        const priceTitleArray = []
+        res.quality.map((tab, key) => {
+          priceTitleArray.push({ key: tab.name, tab: tab.name })
+        })
+        res.product.map((product) => {
+          this.priceData.push({ key: product, title: product })
+        })
         this.list = res
+        this.priceTitle = priceTitleArray
+        this.priceTitleKey = priceTitleArray[0].key
+        this.targetKeys = res.price[priceTitleArray[0].key]
+        this.noTitleKey = 'department'
         this.currentContent = this.list['department']
       })
   },
@@ -118,16 +153,28 @@ export default {
         }
       })
     },
-    cancel (e) {
-      console.log(e)
-      this.$message.error('Click on No')
-    },
     onTabChange (key) {
       this.currentContent = this.list[key]
       this.noTitleKey = key
     },
-    log (ff) {
-      console.log(ff)
+    handleChange (nextTargetKeys, direction, moveKeys) {
+      this.targetKeys = nextTargetKeys
+      this.list.price[this.priceTitleKey] = nextTargetKeys
+    },
+    handleSelectChange (sourceSelectedKeys, targetSelectedKeys) {
+      this.selectedKeys = [...sourceSelectedKeys, ...targetSelectedKeys]
+    },
+    priceTabChange (key, type) {
+      this.targetKeys = this.list.price[key]
+      this[type] = key
+    },
+    saveTargetHeader () {
+      const data = { type: 'price', data: this.list.price }
+      this.$http.put('/api/list', data).then(res => {
+        if (res.status === 'success') {
+          this.$message.success('修改成功！')
+        }
+      })
     }
   }
 }
