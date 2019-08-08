@@ -1,17 +1,4 @@
 <template>
-  <!-- <page-view :title="title">
-    <a-card :bordered="false">
-      <div class="title">部门详情</div>
-      <s-table
-        style="margin-bottom: 24px"
-        row-key="id"
-        :showPagination="false"
-        :columns="goodsColumns"
-        :data="loadGoodsData">
-
-      </s-table>
-    </a-card>
-  </page-view> -->
   <a-card :bordered="false">
     <div class="title">部门详情</div>
     <s-table
@@ -20,7 +7,6 @@
       :showPagination="false"
       :columns="goodsColumns"
       :data="loadGoodsData">
-
     </s-table>
   </a-card>
 </template>
@@ -46,38 +32,31 @@ export default {
       goodsColumns: [
         {
           title: '部门',
-          dataIndex: 'department',
-          key: 'department'
+          dataIndex: 'department'
         },
         {
           title: '成品',
-          dataIndex: 'cp_weight',
-          key: 'cp_weight'
+          dataIndex: 'cp_weight'
         },
         {
           title: '发货',
-          dataIndex: 'send_weight',
-          key: 'send_weight'
+          dataIndex: 'send_weight'
         },
         {
           title: '废品',
-          dataIndex: 'fp_weight',
-          key: 'fp_weight'
+          dataIndex: 'fp_weight'
         },
         {
           title: '退货',
-          dataIndex: 'th_weight',
-          key: 'th_weight'
+          dataIndex: 'th_weight'
         },
         {
           title: '粉/线',
-          dataIndex: 'fx_weight',
-          key: 'fx_weight'
+          dataIndex: 'fx_weight'
         },
         {
           title: '损耗',
-          dataIndex: 'lost_weight',
-          key: 'lost_weight'
+          dataIndex: 'lost_weight'
         }
       ],
       // 加载数据方法 必须为 Promise 对象
@@ -85,7 +64,7 @@ export default {
         return getStatistics(this.query)
           .then(res => {
             console.log(res)
-            res.data.push(res.total)
+            // res.data.push(res.total)
             const list = { data: res.data, pageSize: 30, pageNo: 1, totalPage: 1, totalCount: 1 }
             return list
           })

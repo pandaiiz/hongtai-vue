@@ -2,81 +2,76 @@
   <a-table
     :columns="columns"
     :dataSource="data"
+    :pagination="false"
     bordered
-    size="middle"
-    :scroll="{ x: '130%', y: 240 }"
+    size="small"
   />
 </template>
 <script>
 import { getInfoList } from '@/api/manage'
-const columns = [{
-  title: '客户名称',
-  dataIndex: 'name',
-  key: 'name',
-  width: 100,
-  fixed: 'left'
-  // filters: [{
-  //   text: 'Joe',
-  //   value: 'Joe'
-  // }, {
-  //   text: 'John',
-  //   value: 'John'
-  // }],
-  // onFilter: (value, record) => record.name.indexOf(value) === 0
-}, {
-  title: 'Other',
-  children: [{
-    title: 'Age',
-    dataIndex: 'age',
-    key: 'age',
-    width: 200,
-    sorter: (a, b) => a.age - b.age
-  }]
-}, {
-  title: 'Company',
-  children: [{
-    title: 'Company Address',
-    dataIndex: 'companyAddress',
-    key: 'companyAddress'
-  }, {
-    title: 'Company Name',
-    dataIndex: 'companyName',
-    key: 'companyName'
-  }]
-}, {
-  title: 'Gender',
-  dataIndex: 'gender',
-  key: 'gender',
-  width: 80
-}]
-
-const data = []
-for (let i = 0; i < 100; i++) {
-  data.push({
-    key: i,
-    name: 'John Brown',
-    age: i + 1,
-    street: 'Lake Park',
-    building: 'C',
-    number: 2035,
-    companyAddress: 'Lake Street 42',
-    companyName: 'SoftLake Co',
-    gender: 'M'
-  })
-}
+import pinyin from 'pinyin'
 
 export default {
   created () {
-    getInfoList()
-      .then(res => {
-        console.log(res.quality)
-        console.log(res.product)
-      })
+    this.initColumns()
+    this.loadPrice()
   },
   data () {
     return {
-      data,
-      columns
+      data: [],
+      columns: [{
+        title: '客户',
+        dataIndex: 'name',
+        key: 'name',
+        fixed: 'left',
+        align: 'center',
+        width: 80
+      }]
+    }
+  },
+  methods: {
+    initColumns () {
+      getInfoList()
+        .then(res => {
+          for (const name in res.price) {
+            const children = []
+            res.price[name].map((value) => {
+              const keyIndex = pinyin(`${name + value}`, {
+                style: pinyin.STYLE_NORMAL,
+                heteronym: true
+              }).join('').toLowerCase()
+              children.push({
+                title: value,
+                align: 'center',
+                dataIndex: keyIndex
+              })
+            })
+            this.columns.push({
+              title: name,
+              children: children
+            })
+          }
+        })
+    },
+    loadPrice () {
+      this.$http.get('/api/company').then(res => {
+        if (res.status === 'success') {
+          res.data.map((value) => {
+            const priceList = JSON.parse(value.price_list)
+            const company = {}
+            company['name'] = value.name
+            company['key'] = value.code
+            priceList.map((price) => {
+              const keyIndex = pinyin(`${price.quality + price.name}`, {
+                style: pinyin.STYLE_NORMAL,
+                heteronym: true
+              }).join('').toLowerCase()
+              company[keyIndex] = price.unitPrice
+            })
+            this.data.push(company)
+          })
+        }
+      })
     }
   }
 }

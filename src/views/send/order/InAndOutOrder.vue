@@ -19,23 +19,6 @@
           </a-col>
           <a-col :span="12">
             <a-form-item
-              label="出入库"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'type', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入ID' }]}
-                ]">
-                <a-radio-button value="in">入库</a-radio-button>
-                <a-radio-button value="out">出库</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item
               label="客户编码"
               :label-col="{ span: 4 }"
               :wrapper-col="{ span: 20 }"
@@ -51,9 +34,43 @@
           </a-col>
           <a-col :span="12">
             <a-form-item
-              label="客户名称"
+              label="出入库"
               :label-col="{ span: 4 }"
               :wrapper-col="{ span: 20 }"
+            >
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'type', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入ID' }]}
+                ]">
+                <a-radio-button value="in">入库</a-radio-button>
+                <a-radio-button value="out">出库</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              label="客户类型"
+              :label-col="{ span: 8 }"
+              :wrapper-col="{ span: 16 }"
+            >
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'customType', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请选择客户类型' }]}
+                ]">
+                <a-radio-button value="supplier">供应商</a-radio-button>
+                <a-radio-button value="customer">客户</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item
+              label="客户名称"
+              :label-col="{ span: 12 }"
+              :wrapper-col="{ span: 12 }"
             >
               <a-input
                 placeholder="请输入客户名称"
@@ -350,7 +367,8 @@ export default {
         .then(res => {
           if (res.status === 'success') {
             this.form.setFieldsValue({
-              customName: res.data[0].name
+              customName: res.data[0].name,
+              customType: res.data[0].type
             })
           }
         })
@@ -387,12 +405,12 @@ export default {
           values.info = JSON.stringify(dataList)
           this.$http.post('/api/order', values).then(res => {
             console.log(res)
-            // if (res.status === 'success') {
-            //   this.$message.info('新增成功！')
-            //   this.visible = false
-            //   this.form.resetFields()
-            //   this.$refs.table.refresh()
-            // }
+            if (res.status === 'success') {
+              this.$message.info('新增成功！')
+              this.visible = false
+              this.form.resetFields()
+              // this.$refs.table.refresh()
+            }
           })
         }
       })

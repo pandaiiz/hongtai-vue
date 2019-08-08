@@ -130,6 +130,18 @@
             </a-form-item>
           </a-col>
           <a-col :span="24">
+            <a-form-item label="仓库">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'store',
+                  {rules: [{ required: true, message: '请选择仓库' }]}
+                ]">
+                <a-radio-button v-for="item in listData.store" :key="item" :value="item">{{ item }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
             <a-form-item label="类别">
               <a-radio-group
                 buttonStyle="solid"
@@ -320,10 +332,8 @@ export default {
       ],
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        console.log(Object.assign(parameter, this.queryParam))
         return getDataList(Object.assign(parameter, this.queryParam))
           .then(res => {
-            console.log(res)
             res.result.data.map((val) => {
               val['editable'] = false
             })
@@ -429,7 +439,8 @@ export default {
           category: row.category,
           quality: row.quality,
           product: row.product,
-          type: row.type
+          type: row.type,
+          store: row.store
         })
       }, 0)
     },

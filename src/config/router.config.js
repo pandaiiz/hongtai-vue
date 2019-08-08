@@ -67,8 +67,14 @@ export const asyncRouterMap = [
           {
             path: '/report/customer',
             name: 'ReportCustomer',
-            component: () => import('@/views/report/advanced/Advanced'),
-            meta: { title: '客户统计', permission: [ 'profile' ] }
+            component: () => import('@/views/report/company/ReportCompany'),
+            meta: { title: '客户出入明细', permission: [ 'profile' ] }
+          },
+          {
+            path: '/report/supplier',
+            name: 'ReportSupplier',
+            component: () => import('@/views/report/supplier/ReportSupplier'),
+            meta: { title: '供应商出入明细', permission: [ 'profile' ] }
           }
         ]
       },

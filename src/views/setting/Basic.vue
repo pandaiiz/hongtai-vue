@@ -82,7 +82,8 @@ export default {
         { key: 'product', tab: '产品' },
         { key: 'quality', tab: '成色' },
         { key: 'order', tab: '收发单品类' },
-        { key: 'price', tab: '价格明细' }
+        { key: 'price', tab: '价格明细' },
+        { key: 'store', tab: '仓库' }
       ],
       priceTitle: [],
       noTitleKey: '',
@@ -158,6 +159,11 @@ export default {
       this.noTitleKey = key
     },
     handleChange (nextTargetKeys, direction, moveKeys) {
+      nextTargetKeys.find((item, key) => {
+        if (!this.list.product.includes(item)) {
+          nextTargetKeys.splice(key, 1)
+        }
+      })
       this.targetKeys = nextTargetKeys
       this.list.price[this.priceTitleKey] = nextTargetKeys
     },
