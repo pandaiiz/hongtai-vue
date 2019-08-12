@@ -96,20 +96,19 @@ module.exports = {
     port: 8000,
     proxy: {
       '/api': {
-        target: 'http://192.168.123.100:4888',
-        // target: 'http://localhost:4888',
+        // target: 'http://192.168.123.100:4888',
+        target: 'http://192.168.0.135:4888',
         ws: false,
         changeOrigin: true
       },
       '/collecter': {
-        target: 'http://192.168.123.100:4888',
-        // target: 'http://localhost:4888',
+        // target: 'http://192.168.123.100:4888',
+        target: 'http://192.168.0.135:4888',
         ws: false,
         changeOrigin: true
       }
     }
   },
-
   // disable source map in production
   productionSourceMap: false,
   lintOnSave: undefined,

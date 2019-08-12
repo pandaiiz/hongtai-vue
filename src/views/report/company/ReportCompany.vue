@@ -18,12 +18,18 @@ const columns = [{
   dataIndex: 'custom_name',
   scopedSlots: { customRender: 'name' }
 }, {
-  title: '入库',
+  title: '退工费',
   dataIndex: 'inCost',
   scopedSlots: { customRender: 'money' }
 }, {
-  title: '出库',
+  title: '工费',
   dataIndex: 'outCost'
+}, {
+  title: '退货',
+  dataIndex: 'inWeight'
+}, {
+  title: '欠料',
+  dataIndex: 'outWeight'
 }, {
   title: '差值',
   dataIndex: 'earn',

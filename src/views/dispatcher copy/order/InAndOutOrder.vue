@@ -49,28 +49,11 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
-          <a-col :span="6">
-            <a-form-item
-              label="客户类型"
-              :label-col="{ span: 8 }"
-              :wrapper-col="{ span: 16 }"
-            >
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'customType', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请选择客户类型' }]}
-                ]">
-                <a-radio-button value="supplier">供应商</a-radio-button>
-                <a-radio-button value="customer">客户</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="6">
+          <a-col :span="12">
             <a-form-item
               label="客户名称"
-              :label-col="{ span: 12 }"
-              :wrapper-col="{ span: 12 }"
+              :label-col="{ span: 4 }"
+              :wrapper-col="{ span: 20 }"
             >
               <a-input
                 placeholder="请输入客户名称"
@@ -80,20 +63,13 @@
                 ]" />
             </a-form-item>
           </a-col>
-          <a-col :span="24">
+          <a-col :span="12">
             <a-form-item
               label="类型"
-              :label-col="{ span: 2 }"
-              :wrapper-col="{ span: 22 }"
+              :label-col="{ span: 4 }"
+              :wrapper-col="{ span: 20 }"
             >
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'orderType', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请选择订单类型' }]}
-                ]">
-                <a-radio-button v-for="item in typeOption" :key="item" :value="item">{{ item }}</a-radio-button>
-              </a-radio-group>
+              <a-cascader :defaultValue="['customer','product']" :options="options" @change="onChange" changeOnSelect/>
             </a-form-item>
           </a-col>
           <a-col :span="12">
@@ -171,95 +147,17 @@
         <a-button v-if="this.data.length < 6" type="dashed" @click="newMember">新增</a-button>
         <a-button @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
       </div>
-      <router-link to="{ path : '/setting/customer-input' }">
-        <a-button>跳转</a-button>
-      </router-link>
-      <a-button>导出</a-button>
     </a-card>
-    <template>
-      <div>
-        <!-- <a-button type="primary" @click="showPrint">预览</a-button> -->
-        <a-modal title="打印预览" v-model="visible" :bodyStyle="{ width: '800px' }">
-          <template slot="footer">
-            <a-button key="back" @click="closePrint">关闭</a-button>
-            <a-button v-print="'#printMe'" type="primary" :loading="loading">
-              打印
-            </a-button>
-          </template>
-          <div id="printMe">
-            <p>葫芦娃，葫芦娃</p>
-            <p>一根藤上七朵花</p>
-            <p>小小树藤是我家啦啦啦啦</p>
-            <p>叮当当咚咚当当浇不大</p>
-            <p> 叮当当咚咚当当是我家</p>
-            <p> 啦啦啦啦</p>
-          </div>
-        </a-modal>
-      </div>
-    </template>
   </div>
 </template>
 
 <script>
 import moment from 'moment'
-// import XLSX from 'xlsx'
-// import saveAs from 'file-saver'
-// const data = [
-//   ['11', '22', '33'],
-//   ['测试1', '测试2', '测试3'],
-//   ['测试1', '测试2', '测试3'],
-//   ['测试1', '测试2', '测试3'],
-//   ['测试1', '测试2', '测试3'],
-//   ['测试1', '测试2', '测试3']
-// ]
-// function Workbook () {
-//   if (!(this instanceof Workbook)) return new Workbook()
-//   this.SheetNames = []
-//   this.Sheets = {}
-// }
-// function sheetFromArrayOfArrays (data, opts) {
-//   var ws = {}
-//   var range = { s: { c: 10000000, r: 10000000 }, e: { c: 0, r: 0 } }
-//   for (var R = 0; R !== data.length; ++R) {
-//     for (var C = 0; C !== data[R].length; ++C) {
-//       if (range.s.r > R) range.s.r = R
-//       if (range.s.c > C) range.s.c = C
-//       if (range.e.r < R) range.e.r = R
-//       if (range.e.c < C) range.e.c = C
-//       var cell = { v: data[R][C] }
-//       if (cell.v == null) continue
-//       var cellRef = XLSX.utils.encode_cell({ c: C, r: R })
-//       if (typeof cell.v === 'number') cell.t = 'n'
-//       else if (typeof cell.v === 'boolean') cell.t = 'b'
-//       else if (cell.v instanceof Date) {
-//         cell.t = 'n'
-//         cell.z = XLSX.SSF._table[14]
-//       } else cell.t = 's'
-//       ws[cellRef] = cell
-//     }
-//   }
-//   if (range.s.c < 10000000) ws['!ref'] = XLSX.utils.encode_range(range)
-//   return ws
-// }
-// const workBook = new Workbook()
-// const ws = sheetFromArrayOfArrays(data)
-// workBook.SheetNames.push('测试')
-// workBook.Sheets['测试'] = ws
-// const wbout = XLSX.write(workBook, {
-//   bookType: 'xlsx',
-//   bookSST: true,
-//   type: 'binary'
-// })
-// function s2ab (s) {
-//   var buf = new ArrayBuffer(s.length)
-//   var view = new Uint8Array(buf)
-//   for (var i = 0; i !== s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF
-//   return buf
-// }
-// saveAs(new Blob([s2ab(wbout)], { type: '' }), 'report888.xlsx')
 export default {
   data () {
     return {
+      options: [],
+      customType: '',
       visible: false,
       typeOption: {},
       qualityOption: {},
@@ -339,7 +237,30 @@ export default {
     this.form = this.$form.createForm(this)
   },
   created () {
-    this.$http.get('/api/list').then(res => { this.typeOption = res.order; this.qualityOption = res.quality })
+    this.$http.get('/api/list').then(res => {
+      this.typeOption = res.order
+      this.qualityOption = res.quality
+      const gg = []
+      res.order.map((val) => {
+        gg.push({ value: val, label: val })
+      })
+      this.options = [{
+        value: 'supplier',
+        label: '供应商',
+        children: gg
+      }, {
+        value: 'customer',
+        label: '客户',
+        children: [{
+          value: 'material',
+          label: '原料'
+        }, {
+          value: 'product',
+          label: '成品'
+        }]
+      }]
+      console.log(res.order)
+    })
     if (this.$route.query.id) {
       this.$http.get(`/api/order?id=${this.$route.query.id}`)
         .then(res => {
@@ -362,10 +283,14 @@ export default {
     })
   },
   methods: {
+    onChange (value) {
+      console.log(value)
+    },
     findCompanyName (e) {
       this.$http.get(`/api/company?code=${e.target.value}`)
         .then(res => {
           if (res.status === 'success') {
+            this.typeOption = ['成品', '原料']
             this.form.setFieldsValue({
               customName: res.data[0].name,
               customType: res.data[0].type

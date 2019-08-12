@@ -1,8 +1,11 @@
 <template>
   <div>
     <a-card>
-      <a-date-picker :defaultValue="moment()" :format="dateFormat" @change="onChange"/>
-      <a-table :columns="columns" :dataSource="data" :pagination="false" size="middle">
+      <a-row>
+        <a-date-picker :defaultValue="moment()" :format="dateFormat" @change="onChange"/>
+      </a-row>
+      <br />
+      <a-table :columns="columns" :dataSource="data" :pagination="false" size="middle" :rowKey="record => record.department">
       </a-table>
     </a-card>
   </div>

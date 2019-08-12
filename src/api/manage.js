@@ -40,6 +40,14 @@ export function getDataList (parameter) {
   })
 }
 
+export function getStoreData (parameter) {
+  return axios({
+    url: '/api/machining/store',
+    method: 'get',
+    params: parameter
+  })
+}
+
 export function postData (parameter) {
   console.log(parameter)
   return axios({

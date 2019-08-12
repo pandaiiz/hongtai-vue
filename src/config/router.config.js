@@ -8,62 +8,87 @@ export const asyncRouterMap = [
     name: 'index',
     component: BasicLayout,
     meta: { title: '首页' },
-    redirect: '/send/send-receive',
+    redirect: '/dispatcher/send-receive',
     children: [
-      // send
+      // dispatcher 收发
       {
-        path: '/send',
-        name: 'send',
-        redirect: '/send/edit-table',
+        path: '/dispatcher',
+        name: 'dispatcher',
+        redirect: '/dispatcher/send-receive',
         component: RouteView,
         meta: { title: '收发', keepAlive: true, icon: 'edit', permission: [ 'profile' ] },
         children: [
           {
-            path: '/send/send-receive',
+            path: '/dispatcher/send-receive',
             name: 'EditList',
-            component: () => import('@/views/send/TableInnerEditList'),
+            component: () => import('@/views/dispatcher/send/SendReceive'),
             meta: { title: '收发管理', keepAlive: false }
           },
           {
-            path: '/report/day',
+            path: '/dispatcher/report',
             name: 'ReportDay',
-            component: () => import('@/views/report/day/ReportDay'),
+            component: () => import('@/views/dispatcher/report/ReportDay'),
             meta: { title: '部门统计', permission: [ 'profile' ] }
-          },
-          {
-            path: '/report/warehouse',
-            name: 'ReportWarehouse',
-            component: () => import('@/views/report/advanced/Advanced'),
-            meta: { title: '仓库统计', permission: [ 'profile' ] }
+          }, {
+            path: '/dispatcher/warehouse',
+            name: 'Warehouse',
+            component: () => import('@/views/dispatcher/warehouse/WareHouseLayout'),
+            meta: { title: '仓库统计', permission: [ 'profile' ] },
+            redirect: '/dispatcher/warehouse/statistic',
+            hideChildrenInMenu: true,
+            children: [
+              {
+                path: '/dispatcher/warehouse/statistic',
+                name: 'ReportWarehouse',
+                component: () => import('@/views/dispatcher/warehouse/WareHouse'),
+                meta: { title: '仓库统计', permission: [ 'profile' ] }
+              },
+              {
+                path: '/dispatcher/warehouse/warehouse-details',
+                name: 'WareHouseDetails',
+                component: () => import('@/views/dispatcher/warehouse/WareHouseDetails'),
+                meta: { title: '仓库详情', permission: [ 'profile' ] }
+              }
+            ]
           }
         ]
       },
-      // report
+      // in and out 单据
       {
-        path: '/report',
-        name: 'report',
+        path: '/bills',
+        name: 'Bills',
         component: RouteView,
-        redirect: '/report/basic',
-        meta: { title: '出入库', icon: 'profile', permission: [ 'profile' ] },
+        redirect: '/bills/order',
+        meta: { title: '单据', icon: 'profile', permission: [ 'profile' ] },
         children: [
           {
-            path: '/send/in-and-out',
-            name: 'InAndOutOrder',
-            component: () => import('@/views/send/order/InAndOutOrder'),
-            meta: { title: '出入库单', keepAlive: false }
+            path: '/bills/order',
+            name: 'BillsOrder',
+            component: () => import('@/views/bills/order/OrderLayout'),
+            meta: { title: '出入库单', keepAlive: false },
+            redirect: '/bills/order/list',
+            hideChildrenInMenu: true,
+            children: [
+              {
+                path: '/bills/order/write',
+                name: 'BillsWriteOrder',
+                component: () => import('@/views/bills/order/OrderWrite'),
+                meta: { title: '出入库单', keepAlive: false }
+              },
+              {
+                path: '/bills/order/list',
+                name: 'BillsOrderList',
+                component: () => import('@/views/bills/order/OrderList'),
+                meta: { title: '单据列表', keepAlive: false }
+              }
+            ]
           },
-          {
-            path: '/send/order-list',
-            name: 'OrderList',
-            component: () => import('@/views/send/order/OrderList'),
-            meta: { title: '出入库列表', keepAlive: false }
-          },
-          {
-            path: '/report/total',
-            name: 'ReportTotal',
-            component: () => import('@/views/report/total/ReportTotal'),
-            meta: { title: '总计', permission: [ 'profile' ] }
-          },
+          // {
+          //   path: '/report/total',
+          //   name: 'ReportTotal',
+          //   component: () => import('@/views/report/total/ReportTotal'),
+          //   meta: { title: '总计', permission: [ 'profile' ] }
+          // },
           {
             path: '/report/customer',
             name: 'ReportCustomer',
