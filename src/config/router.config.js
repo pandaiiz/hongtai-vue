@@ -5,7 +5,7 @@ export const asyncRouterMap = [
 
   {
     path: '/',
-    name: 'index',
+    name: 'Index',
     component: BasicLayout,
     meta: { title: '首页' },
     redirect: '/dispatcher/send-receive',
