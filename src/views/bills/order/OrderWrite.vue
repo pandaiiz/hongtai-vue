@@ -9,70 +9,67 @@
         <a-row :gutter="8">
           <a-col :span="12">
             <a-form-item
+              label="单据类型"
+              :label-col="{ span: 4 }"
+              :wrapper-col="{ span: 20 }"
+            >
+              <a-cascader
+                v-decorator="[
+                  'orderType', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请选择单据类型' }]}
+                ]"
+                :options="options"
+                @change="orderTypeOnChange"
+                placeholder="请选择单据类型"/>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item
               :label-col="{ span: 4 }"
               :wrapper-col="{ span: 20 }"
               label="日期">
               <a-date-picker
+                style="width: 100%"
                 :format="dateFormat"
                 v-decorator="[
-                  'date', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入ID' }]}
+                  'date',
+                  {rules: [{ required: true, message: '请选择日期' }]}
                 ]"/>
             </a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item
-              label="客户编码"
+              label="公司编码"
               :label-col="{ span: 4 }"
               :wrapper-col="{ span: 20 }"
             >
               <a-input
                 @blur="findCompanyName($event)"
-                placeholder="请输入客户编码"
+                placeholder="请输入公司编码"
                 v-decorator="[
-                  'customCode', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入客户编码' }]}
+                  'companyCode', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入公司编码' }]}
                 ]"/>
             </a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item
-              label="出入库"
+              label="公司名称"
               :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
-              <a-radio-group
-                buttonStyle="solid"
+              :wrapper-col="{ span: 20 }">
+              <a-select
                 v-decorator="[
-                  'type', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入ID' }]}
-                ]">
-                <a-radio-button value="in">入库</a-radio-button>
-                <a-radio-button value="out">出库</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item
-              label="客户名称"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
-              <a-input
-                placeholder="请输入客户名称"
-                v-decorator="[
-                  'customName', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入客户请输入客户名称编码' }]}
-                ]" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item
-              label="类型"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
-              <a-cascader :defaultValue="['customer','product']" :options="options" @change="onChange" changeOnSelect/>
+                  'companyName', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入公司名称' }]}
+                ]"
+                showSearch
+                placeholder="请输入公司名称"
+                optionFilterProp="children"
+                @change="companyNameChange"
+                :filterOption="filterOption"
+              >
+                <a-select-option v-for="item in companys" :value="item.name" :key="item.code">{{ item.name }}</a-select-option>
+              </a-select>
             </a-form-item>
           </a-col>
           <a-col :span="12">
@@ -101,6 +98,23 @@
                 ]"/>
             </a-form-item>
           </a-col>
+          <a-col :span="12">
+            <a-form-item
+              label="出入库"
+              :label-col="{ span: 4 }"
+              :wrapper-col="{ span: 20 }"
+            >
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'type', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入ID' }]}
+                ]">
+                <a-radio-button value="in">入库</a-radio-button>
+                <a-radio-button value="out">出库</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
         </a-row>
       </a-form>
       <a-table
@@ -110,12 +124,12 @@
         :pagination="false"
         :loading="memberLoading">
         <template v-for="(col, i) in ['orderId', 'productName', 'quality', 'number', 'weight', 'unitPrice', 'pay', 'remarks']" :slot="col" slot-scope="text, record">
-          <a-select :key="col" style="width: 70px" v-if="record.editable && col == 'quality'" :value="text" @change="e => handleChange(e, record.key, col)">
-            <a-select-option v-for="(quality, index) in qualityOption" :key="index" :value="quality.name">{{ quality.name }}</a-select-option>
+          <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'productName'" :value="text" @change="e => handleChange(e, record.key, col)">
+            <a-select-option v-for="(product, index) in priceList" @click="setQuality(record.key, product.quality, product.unitPrice)" :key="index" :value="`${product.quality + product.name}`">{{ product.quality + product.name }}</a-select-option>
           </a-select>
           <a-input
             :key="col"
-            v-else-if="record.editable && col !== 'quality'"
+            v-else-if="record.editable && col !== 'productName'"
             style="margin: -5px 0"
             :value="text"
             @change="e => handleChange(e.target.value, record.key, col)"
@@ -156,84 +170,83 @@
 
 <script>
 import moment from 'moment'
+const columns = [
+  {
+    title: '订单号',
+    dataIndex: 'orderId',
+    key: 'orderId',
+    align: 'center',
+    scopedSlots: { customRender: 'orderId' }
+  },
+  {
+    title: '货品名称',
+    dataIndex: 'productName',
+    key: 'productName',
+    align: 'center',
+    scopedSlots: { customRender: 'productName' }
+  },
+  {
+    title: '成色',
+    dataIndex: 'quality',
+    key: 'quality',
+    align: 'center',
+    scopedSlots: { customRender: 'quality' }
+  },
+  {
+    title: '数量(件)',
+    dataIndex: 'number',
+    key: 'number',
+    align: 'center',
+    scopedSlots: { customRender: 'number' }
+  },
+  {
+    title: '重量(g)',
+    dataIndex: 'weight',
+    key: 'weight',
+    align: 'center',
+    scopedSlots: { customRender: 'weight' }
+  },
+  {
+    title: '单价',
+    dataIndex: 'unitPrice',
+    key: 'unitPrice',
+    align: 'center',
+    scopedSlots: { customRender: 'unitPrice' }
+  },
+  {
+    title: '合计工费',
+    dataIndex: 'pay',
+    key: 'pay',
+    align: 'center',
+    scopedSlots: { customRender: 'pay' }
+  },
+  {
+    title: '备注',
+    dataIndex: 'remarks',
+    key: 'remarks',
+    align: 'center',
+    scopedSlots: { customRender: 'remarks' }
+  },
+  {
+    title: '操作',
+    key: 'action',
+    align: 'center',
+    scopedSlots: { customRender: 'operation' }
+  }
+]
 export default {
   data () {
     return {
+      priceList: [],
+      companys: [],
+      columns,
       options: [],
+      orderType: [],
       customType: '',
-      visible: false,
-      typeOption: {},
       qualityOption: {},
       dateFormat: 'YYYY/MM/DD',
-      loading: false,
       memberLoading: false,
-      // table
-      columns: [
-        {
-          title: '订单号',
-          dataIndex: 'orderId',
-          key: 'orderId',
-          align: 'center',
-          scopedSlots: { customRender: 'orderId' }
-        },
-        {
-          title: '货品名称',
-          dataIndex: 'productName',
-          key: 'productName',
-          align: 'center',
-          scopedSlots: { customRender: 'productName' }
-        },
-        {
-          title: '成色',
-          dataIndex: 'quality',
-          key: 'quality',
-          align: 'center',
-          scopedSlots: { customRender: 'quality' }
-        },
-        {
-          title: '数量(件)',
-          dataIndex: 'number',
-          key: 'number',
-          align: 'center',
-          scopedSlots: { customRender: 'number' }
-        },
-        {
-          title: '重量(g)',
-          dataIndex: 'weight',
-          key: 'weight',
-          align: 'center',
-          scopedSlots: { customRender: 'weight' }
-        },
-        {
-          title: '单价',
-          dataIndex: 'unitPrice',
-          key: 'unitPrice',
-          align: 'center',
-          scopedSlots: { customRender: 'unitPrice' }
-        },
-        {
-          title: '合计工费',
-          dataIndex: 'pay',
-          key: 'pay',
-          align: 'center',
-          scopedSlots: { customRender: 'pay' }
-        },
-        {
-          title: '备注',
-          dataIndex: 'remarks',
-          key: 'remarks',
-          align: 'center',
-          scopedSlots: { customRender: 'remarks' }
-        },
-        {
-          title: '操作',
-          key: 'action',
-          align: 'center',
-          scopedSlots: { customRender: 'operation' }
-        }
-      ],
-      data: [],
-      errors: []
+      data: []
     }
   },
   beforeCreate () {
@@ -241,7 +254,6 @@ export default {
   },
   created () {
     this.$http.get('/api/list').then(res => {
-      this.typeOption = res.order
       this.qualityOption = res.quality
       const gg = []
       res.order.map((val) => {
@@ -250,16 +262,25 @@ export default {
       this.options = [{
         value: 'supplier',
         label: '供应商',
-        children: gg
+        children: [{
+          value: '铜胚出入',
+          label: '铜胚出入'
+        }, {
+          value: '电铸出入',
+          label: '电铸出入'
+        }, {
+          value: '刀具出入',
+          label: '刀具出入'
+        }]
       }, {
         value: 'customer',
         label: '客户',
         children: [{
-          value: 'material',
-          label: '原料'
+          value: '铜胚出入',
+          label: '铜胚出入'
         }, {
-          value: 'product',
-          label: '成品'
+          value: '成品出入',
+          label: '成品出入'
         }]
       }]
     })
@@ -271,8 +292,8 @@ export default {
             date: moment(res.data[0].timestamp),
             totalPay: res.data[0].total_cost,
             totalWeight: res.data[0].total_weight,
-            customName: res.data[0].custom_name,
-            customCode: res.data[0].custom_code,
+            companyName: res.data[0].custom_name,
+            companyCode: res.data[0].custom_code,
             orderType: res.data[0].state,
             type: res.data[0].type
           })
@@ -285,36 +306,51 @@ export default {
     })
   },
   methods: {
-    onChange (value) {
-      console.log(value)
+    setQuality (index, value, price) {
+      this.data[+index - 1].quality = value
+      this.data[+index - 1].unitPrice = price
+    },
+    companyNameChange (value) {
+      const company = this.companys.find(item => item.name === value)
+      this.priceList = JSON.parse(company.price_list)
+      this.form.setFieldsValue({
+        companyCode: company.code
+      })
+    },
+    filterOption (input, option) {
+      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
+    },
+    orderTypeOnChange (value) {
+      this.$http.get(`/api/company?companyType=${value[0]}&orderType=${value[1]}`)
+        .then(res => {
+          if (res.status === 'success') {
+            this.companys = res.data
+            this.form.resetFields(['companyName', 'companyCode'])
+          }
+        })
     },
     findCompanyName (e) {
+      if (!e.target.value) {
+        return
+      }
       this.$http.get(`/api/company?code=${e.target.value}`)
         .then(res => {
           if (res.status === 'success') {
-            this.typeOption = ['成品', '原料']
+            this.$http.get(`/api/company?companyType=${res.data[0].company_type}&orderType=${res.data[0].order_type}`)
+              .then(result => {
+                if (result.status === 'success') {
+                  this.companys = result.data
+                }
+              })
             this.form.setFieldsValue({
-              customName: res.data[0].name,
+              orderType: [res.data[0].company_type, res.data[0].order_type]
+            })
+            this.form.setFieldsValue({
+              companyName: res.data[0].name,
               customType: res.data[0].type
             })
           }
         })
-    },
-    handleOk (e) {
-      this.loading = true
-      setTimeout(() => {
-        this.visible = false
-        this.loading = false
-      }, 3000)
-    },
-    closePrint (e) {
-      this.visible = false
-    },
-    showPrint () {
-      this.visible = true
-    },
-    printOrder (e) {
-      this.visible = false
     },
     moment,
     handleSubmit (e) {
@@ -333,7 +369,6 @@ export default {
           this.$http.post('/api/order', values).then(res => {
             if (res.status === 'success') {
               this.$message.info('新增成功！')
-              this.visible = false
               this.form.resetFields()
             }
           })
@@ -341,6 +376,10 @@ export default {
       })
     },
     newMember () {
+      if (this.priceList.length === 0) {
+        this.$message.warning('请先选择相应公司')
+        return
+      }
       const length = this.data.length
       if (length > 5) {
         this.$message.error('最多只能添加6条')
@@ -349,6 +388,7 @@ export default {
       this.data.push({
         key: length === 0 ? '1' : (parseInt(this.data[length - 1].key) + 1).toString(),
         orderId: '',
+        quality: '',
         productName: '',
         name: '',
         workId: '',

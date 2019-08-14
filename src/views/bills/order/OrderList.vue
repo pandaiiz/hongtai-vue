@@ -143,7 +143,7 @@ export default {
     }
   },
   created () {
-    this.$http.get('/api/company').then(res => {
+    this.$http.get('/api/company?type=full').then(res => {
       if (res.status === 'success') {
         this.listData = res.data
       }

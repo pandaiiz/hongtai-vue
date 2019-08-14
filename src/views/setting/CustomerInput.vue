@@ -5,101 +5,119 @@
         <a-icon type="left" />客户列表
       </a-button>
     </router-link>
-    <a-form :form="form">
-      <a-form-item
-        label="编码"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input
-          :disabled="state"
-          v-decorator="[
-            'code',
-            {rules: [{ required: true, message: '请输入客户' }]}
-          ]"
-          name="name"
-          placeholder="客户编码" />
-      </a-form-item>
-      <a-form-item
-        label="名称"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input
-          v-decorator="[
-            'name',
-            {rules: [{ required: true, message: '请输入客户名称' }]}
-          ]"
-          name="name"
-          placeholder="客户名称" />
-      </a-form-item>
-      <a-form-item
-        label="备注"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-textarea
-          rows="4"
-          v-decorator="[
-            'remarks'
-          ]" />
-      </a-form-item>
-      <a-form-item
-        label="类型"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-radio-group
-          buttonStyle="solid"
-          v-decorator="[
-            'type',
-            {rules: [{ required: true, message: '请选择录入类型' }]}
-          ]">
-          <a-radio-button value="supplier">供应商</a-radio-button>
-          <a-radio-button value="customer">客户</a-radio-button>
-        </a-radio-group>
-      </a-form-item>
-    </a-form>
-    <a-table
-      size="middle"
-      :columns="columns"
-      :dataSource="data"
-      :pagination="false"
-      :loading="memberLoading">
-      <template v-for="(col, i) in ['quality', 'name', 'unitPrice', 'remarks']" :slot="col" slot-scope="text, record">
-        <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'quality'" :value="text" @change="e => handleChange(e, record.key, col)">
-          <a-select-option v-for="(quality, index) in qualityOption" :key="index" :value="quality.name">{{ quality.name }}</a-select-option>
-        </a-select>
-        <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'name'" :value="text" @change="e => handleChange(e, record.key, col)">
-          <a-select-option v-for="(product, index) in productOption" :key="index" :value="product">{{ product }}</a-select-option>
-        </a-select>
-        <a-input
-          :key="col"
-          v-else-if="record.editable && col !== 'quality'"
-          style="margin: -5px 0"
-          :value="text"
-          @change="e => handleChange(e.target.value, record.key, col)"
-        />
-        <template v-else-if="!record.editable">{{ text }}</template>
-      </template>
-      <template slot="operation" slot-scope="text, record">
-        <template v-if="record.editable">
-          <span v-if="record.isNew">
-            <a @click="saveRow(record)">保存</a>
+    <a-spin tip="加载中..." :spinning="spinning">
+      <a-form :form="form">
+        <a-form-item
+          label="编码"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-input
+            :disabled="state"
+            v-decorator="[
+              'code',
+              {rules: [{ required: true, message: '请输入客户' }]}
+            ]"
+            name="name"
+            placeholder="客户编码" />
+        </a-form-item>
+        <a-form-item
+          label="名称"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-input
+            v-decorator="[
+              'name',
+              {rules: [{ required: true, message: '请输入名称' }]}
+            ]"
+            name="name"
+            placeholder="名称" />
+        </a-form-item>
+        <a-form-item
+          label="备注"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-textarea
+            rows="4"
+            v-decorator="[
+              'remarks',
+              {initialValue: ''},
+            ]" />
+        </a-form-item>
+        <a-form-item
+          label="公司类型"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-radio-group
+            v-decorator="[
+              'companyType',
+              {rules: [{ required: true, message: '请选择公司类型' }], initialValue: 'customer'}
+            ]"
+            buttonStyle="solid"
+            @change="companyTypeChange">
+            <a-radio-button value="customer">客户</a-radio-button>
+            <a-radio-button value="supplier">供应商</a-radio-button>
+          </a-radio-group>
+        </a-form-item>
+        <a-form-item
+          label="单据类型"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-select
+            v-decorator="[
+              'orderType',
+              {rules: [{ required: true, message: '请选择单据类型' }]}
+            ]"
+            placeholder="请选择单据类型">
+            <a-select-option v-for="type in orderType" :key="type">{{ type }}</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+
+      <a-table
+        size="middle"
+        :columns="columns"
+        :dataSource="data"
+        :pagination="false"
+        :loading="memberLoading">
+        <template v-for="(col, i) in ['quality', 'name', 'unitPrice', 'remarks']" :slot="col" slot-scope="text, record">
+          <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'quality'" :value="text" @change="e => handleChange(e, record.key, col)">
+            <a-select-option v-for="(quality, index) in qualityOption" :key="index" :value="quality.name">{{ quality.name }}</a-select-option>
+          </a-select>
+          <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'name'" :value="text" @change="e => handleChange(e, record.key, col)">
+            <a-select-option v-for="(product, index) in productOption" :key="index" :value="product">{{ product }}</a-select-option>
+          </a-select>
+          <a-input
+            :key="col"
+            v-else-if="record.editable && col !== 'quality'"
+            style="margin: -5px 0"
+            :value="text"
+            @change="e => handleChange(e.target.value, record.key, col)"
+          />
+          <template v-else-if="!record.editable">{{ text }}</template>
+        </template>
+        <template slot="operation" slot-scope="text, record">
+          <template v-if="record.editable">
+            <span v-if="record.isNew">
+              <a @click="saveRow(record)">保存</a>
+              <a-divider type="vertical" />
+              <a-popconfirm title="是否要删除此行？" @confirm="remove(record.key)">
+                <a>删除</a>
+              </a-popconfirm>
+            </span>
+            <span v-else>
+              <a @click="saveRow(record)">保存</a>
+            </span>
+          </template>
+          <span v-else>
+            <a @click="toggle(record.key)">编辑</a>
             <a-divider type="vertical" />
             <a-popconfirm title="是否要删除此行？" @confirm="remove(record.key)">
               <a>删除</a>
             </a-popconfirm>
           </span>
-          <span v-else>
-            <a @click="saveRow(record)">保存</a>
-          </span>
         </template>
-        <span v-else>
-          <a @click="toggle(record.key)">编辑</a>
-          <a-divider type="vertical" />
-          <a-popconfirm title="是否要删除此行？" @confirm="remove(record.key)">
-            <a>删除</a>
-          </a-popconfirm>
-        </span>
-      </template>
-    </a-table>
+      </a-table>
+    </a-spin>
     <div style="margin-top: 16px; margin-bottom: 8px; float: right;">
       <a-button type="dashed" @click="newMember">新增</a-button>
       <a-button @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
@@ -108,10 +126,17 @@
 </template>
 
 <script>
+const companyOrderType = {
+  'supplier': ['铜胚出入', '电铸出入', '刀具出入'],
+  'customer': ['铜胚出入', '成品出入']
+}
 export default {
   name: 'BaseForm',
   data () {
     return {
+      spinning: true,
+      companyOrderType,
+      orderType: companyOrderType['customer'],
       state: false,
       value: 1,
       typeOption: {},
@@ -161,41 +186,48 @@ export default {
     }
   },
   created () {
-    this.$http.get('/api/list').then(res => { this.typeOption = res.order; this.qualityOption = res.quality; this.productOption = res.product })
-    // 判断页面类型，复制/新增/编辑
-    switch (this.$route.query.type) {
-      case 'edit':
-        this.state = true
-        if (this.$route.query.code) {
-          this.$http.get(`/api/company?code=${this.$route.query.code}`)
-            .then(res => {
-              this.data = JSON.parse(res.data[0].price_list)
-              this.form.setFieldsValue({
-                code: res.data[0].code,
-                name: res.data[0].name,
-                remarks: res.data[0].remarks,
-                type: res.data[0].type
-              })
-            })
-        }
-        break
-      case 'copy':
-        if (this.$route.query.code) {
-          this.$http.get(`/api/company?code=${this.$route.query.code}`)
-            .then(res => {
-              this.data = JSON.parse(res.data[0].price_list)
-              this.form.setFieldsValue({
-                type: res.data[0].type
-              })
-            })
-        }
-        break
-    }
+    this.$http.get('/api/list').then(res => { this.typeOption = res.order; this.qualityOption = res.quality; this.productOption = res.product }).then(() => this.initValue(this.$route.query.type)).then(() => { this.spinning = false })
   },
   beforeCreate () {
     this.form = this.$form.createForm(this)
   },
   methods: {
+    initValue (queryType) {
+      switch (queryType) {
+        case 'edit':
+          this.state = true
+          if (this.$route.query.code) {
+            this.$http.get(`/api/company?code=${this.$route.query.code}`)
+              .then(res => {
+                this.orderType = companyOrderType[res.data[0].company_type]
+                this.data = JSON.parse(res.data[0].price_list)
+                this.form.setFieldsValue({
+                  code: res.data[0].code,
+                  name: res.data[0].name,
+                  remarks: res.data[0].remarks,
+                  type: res.data[0].type,
+                  orderType: res.data[0].order_type
+                })
+              })
+          }
+          break
+        case 'copy':
+          if (this.$route.query.code) {
+            this.$http.get(`/api/company?code=${this.$route.query.code}`)
+              .then(res => {
+                this.data = JSON.parse(res.data[0].price_list)
+                this.form.setFieldsValue({
+                  type: res.data[0].type
+                })
+              })
+          }
+          break
+      }
+    },
+    companyTypeChange (e) {
+      this.form.resetFields('orderType')
+      this.orderType = companyOrderType[e.target.value]
+    },
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
@@ -222,6 +254,7 @@ export default {
             })
           } else {
             this.$http.get(`/api/company?code=${values.code}`).then(res => {
+              console.log(res)
               if (res.data.length > 0) {
                 this.$message.info('客户编码已存在，请修改！')
                 return false

@@ -32,7 +32,7 @@ export default {
     }
   },
   created () {
-    this.$http.get('/api/company').then(res => {
+    this.$http.get('/api/company?type=full').then(res => {
       if (res.status === 'success') {
         this.companyList = res.data
         this.activeKey = ['1']

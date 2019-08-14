@@ -54,7 +54,7 @@ export default {
         })
     },
     loadPrice () {
-      this.$http.get('/api/company').then(res => {
+      this.$http.get('/api/company?type=full').then(res => {
         if (res.status === 'success') {
           res.data.map((value) => {
             const priceList = JSON.parse(value.price_list)

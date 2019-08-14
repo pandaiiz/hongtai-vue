@@ -121,7 +121,7 @@ export const asyncRouterMap = [
             path: '/setting/customer-input',
             name: 'CustomerInput',
             component: () => import('@/views/setting/CustomerInput'),
-            meta: { title: '客户录入', permission: [ 'profile' ] }
+            meta: { title: '客户录入', permission: [ 'profile' ], keepAlive: false }
           },
           {
             path: '/setting/customer-list',
