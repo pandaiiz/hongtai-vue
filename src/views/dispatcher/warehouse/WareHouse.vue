@@ -6,16 +6,16 @@
       </router-link>
     </template>
     <template slot="weightZt" slot-scope="text, record">
-      {{ (parseFloat(record.sendWeightZt) - parseFloat(record.receiveWeightZt)).toFixed(2) }}
+      {{ (parseFloat(record.receiveWeightZt) - parseFloat(record.sendWeightZt)).toFixed(2) }}
     </template>
     <template slot="numberZt" slot-scope="text, record">
-      {{ (parseFloat(record.sendNumberZt) - parseFloat(record.receiveNumberZt)).toFixed(2) }}
+      {{ (parseFloat(record.receiveNumberZt) - parseFloat(record.sendNumberZt)).toFixed(2) }}
     </template>
     <template slot="weightToday" slot-scope="text, record">
-      {{ (parseFloat(record.sendWeight) - parseFloat(record.receiveWeight)).toFixed(2) }}
+      {{ (parseFloat(record.receiveWeight) - parseFloat(record.sendWeight)).toFixed(2) }}
     </template>
     <template slot="numberToday" slot-scope="text, record">
-      {{ (parseFloat(record.sendNumber) - parseFloat(record.receiveNumber)).toFixed(2) }}
+      {{ (parseFloat(record.receiveNumber) - parseFloat(record.sendNumber)).toFixed(2) }}
     </template>
   </a-table>
 </template>

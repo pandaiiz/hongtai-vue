@@ -5,6 +5,7 @@
         <a-range-picker
           v-model="queryParam.date"
           :format="dateFormat"
+          @change="changeDatePicker"
         />
         <a-select style="width: 120px;margin-left: 8px" :value="queryParam.store" @change="changeSelect">
           <a-select-option v-for="(item, key) in listData.store" :key="key" :value="item">{{ item }}</a-select-option>
@@ -134,8 +135,10 @@ export default {
   },
   methods: {
     moment,
+    changeDatePicker () {
+      this.$refs.table.refresh(true)
+    },
     changeSelect (target) {
-      this.$route.query.store = target
       this.queryParam.store = target
       this.$refs.table.refresh(true)
     }
