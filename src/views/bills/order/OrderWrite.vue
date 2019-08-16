@@ -8,11 +8,7 @@
       <a-form :form="form">
         <a-row :gutter="8">
           <a-col :span="12">
-            <a-form-item
-              label="单据类型"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
+            <a-form-item label="单据类型" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
               <a-cascader
                 v-decorator="[
                   'orderType', // 给表单赋值或拉取表单时，该input对应的key
@@ -20,43 +16,36 @@
                 ]"
                 :options="options"
                 @change="orderTypeOnChange"
-                placeholder="请选择单据类型"/>
+                placeholder="请选择单据类型"
+              />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-              label="日期">
+            <a-form-item :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }" label="日期">
               <a-date-picker
                 style="width: 100%"
                 :format="dateFormat"
                 v-decorator="[
                   'date',
                   {rules: [{ required: true, message: '请选择日期' }]}
-                ]"/>
+                ]"
+              />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item
-              label="公司编码"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
+            <a-form-item label="公司编码" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
               <a-input
                 @blur="findCompanyName($event)"
                 placeholder="请输入公司编码"
                 v-decorator="[
                   'companyCode', // 给表单赋值或拉取表单时，该input对应的key
                   {rules: [{ required: true, message: '请输入公司编码' }]}
-                ]"/>
+                ]"
+              />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item
-              label="公司名称"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }">
+            <a-form-item label="公司名称" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
               <a-select
                 v-decorator="[
                   'companyName', // 给表单赋值或拉取表单时，该input对应的key
@@ -68,48 +57,53 @@
                 @change="companyNameChange"
                 :filterOption="filterOption"
               >
-                <a-select-option v-for="item in companys" :value="item.name" :key="item.code">{{ item.name }}</a-select-option>
+                <a-select-option
+                  v-for="item in companys"
+                  :value="item.name"
+                  :key="item.code"
+                >{{ item.name }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item
-              label="总价"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
+            <a-form-item label="总价" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
               <a-input
                 :disabled="true"
                 v-decorator="[
                   'totalPay', // 给表单赋值或拉取表单时，该input对应的key
-                ]"/>
+                ]"
+              />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item
-              label="总重量"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
+            <a-form-item label="总重量(g)" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
               <a-input
                 :disabled="true"
                 v-decorator="[
                   'totalWeight',
-                ]"/>
+                ]"
+              />
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item
-              label="出入库"
-              :label-col="{ span: 4 }"
-              :wrapper-col="{ span: 20 }"
-            >
+            <a-form-item label="折足(g)" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+              <a-input
+                :disabled="true"
+                v-decorator="[
+                  'convertWeight',
+                ]"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="出入库" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
               <a-radio-group
                 buttonStyle="solid"
                 v-decorator="[
                   'type', // 给表单赋值或拉取表单时，该input对应的key
                   {rules: [{ required: true, message: '请输入ID' }]}
-                ]">
+                ]"
+              >
                 <a-radio-button value="in">入库</a-radio-button>
                 <a-radio-button value="out">出库</a-radio-button>
               </a-radio-group>
@@ -122,10 +116,26 @@
         :columns="columns"
         :dataSource="data"
         :pagination="false"
-        :loading="memberLoading">
-        <template v-for="(col, i) in ['orderId', 'productName', 'quality', 'number', 'weight', 'unitPrice', 'pay', 'remarks']" :slot="col" slot-scope="text, record">
-          <a-select :key="col" style="width: 100px" v-if="record.editable && col == 'productName'" :value="text" @change="e => handleChange(e, record.key, col)">
-            <a-select-option v-for="(product, index) in priceList" @click="setQuality(record.key, product.quality, product.unitPrice)" :key="index" :value="`${product.quality + product.name}`">{{ product.quality + product.name }}</a-select-option>
+        :loading="memberLoading"
+      >
+        <template
+          v-for="(col, i) in ['orderId', 'productName', 'quality', 'number', 'weight', 'unitPrice', 'pay', 'remarks']"
+          :slot="col"
+          slot-scope="text, record"
+        >
+          <a-select
+            :key="col"
+            style="width: 100px"
+            v-if="record.editable && col == 'productName'"
+            :value="text"
+            @change="e => handleChange(e, record.key, col)"
+          >
+            <a-select-option
+              v-for="(product, index) in priceList"
+              @click="setQuality(record.key, product.quality, product.unitPrice)"
+              :key="index"
+              :value="`${product.quality + product.name}`"
+            >{{ product.quality + product.name }}</a-select-option>
           </a-select>
           <a-input
             :key="col"
@@ -163,6 +173,7 @@
       <div style="margin-top: 16px; margin-bottom: 8px; float: right;">
         <a-button v-if="this.data.length < 6" type="dashed" @click="newMember">新增</a-button>
         <a-button @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
+        <a-button @click="downloadExl" type="primary" style="margin-left: 8px;">下载</a-button>
       </div>
     </a-card>
   </div>
@@ -170,6 +181,8 @@
 
 <script>
 import moment from 'moment'
+import xlsxUtils from '@/utils/xlsx.utils'
+import saveAs from 'file-saver'
 const columns = [
   {
     title: '订单号',
@@ -234,6 +247,18 @@ const columns = [
     scopedSlots: { customRender: 'operation' }
   }
 ]
+var Data =
+  [{
+    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+  }, {
+    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+  }, {
+    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+  }, {
+    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+  }]
+var keyMap = ['customer', 'type', 'quality', 'weight', 'unitPrice', 'pay', 'remarks']// 通过设置数组让导出时可以按顺序显示
+
 export default {
   data () {
     return {
@@ -256,48 +281,57 @@ export default {
     this.$http.get('/api/list').then(res => {
       this.qualityOption = res.quality
       const gg = []
-      res.order.map((val) => {
+      res.order.map(val => {
         gg.push({ value: val, label: val })
       })
-      this.options = [{
-        value: 'supplier',
-        label: '供应商',
-        children: [{
-          value: '铜胚出入',
-          label: '铜胚出入'
-        }, {
-          value: '电铸出入',
-          label: '电铸出入'
-        }, {
-          value: '刀具出入',
-          label: '刀具出入'
-        }]
-      }, {
-        value: 'customer',
-        label: '客户',
-        children: [{
-          value: '铜胚出入',
-          label: '铜胚出入'
-        }, {
-          value: '成品出入',
-          label: '成品出入'
-        }]
-      }]
+      this.options = [
+        {
+          value: 'supplier',
+          label: '供应商',
+          children: [
+            {
+              value: '铜胚出入',
+              label: '铜胚出入'
+            },
+            {
+              value: '电铸出入',
+              label: '电铸出入'
+            },
+            {
+              value: '刀具出入',
+              label: '刀具出入'
+            }
+          ]
+        },
+        {
+          value: 'customer',
+          label: '客户',
+          children: [
+            {
+              value: '铜胚出入',
+              label: '铜胚出入'
+            },
+            {
+              value: '成品出入',
+              label: '成品出入'
+            }
+          ]
+        }
+      ]
     })
     if (this.$route.query.id) {
-      this.$http.get(`/api/order?id=${this.$route.query.id}`)
-        .then(res => {
-          this.data = JSON.parse(res.data[0].info)
-          this.form.setFieldsValue({
-            date: moment(res.data[0].timestamp),
-            totalPay: res.data[0].total_cost,
-            totalWeight: res.data[0].total_weight,
-            companyName: res.data[0].custom_name,
-            companyCode: res.data[0].custom_code,
-            orderType: res.data[0].state,
-            type: res.data[0].type
-          })
+      this.$http.get(`/api/order?id=${this.$route.query.id}`).then(res => {
+        this.data = JSON.parse(res.data[0].info)
+        this.form.setFieldsValue({
+          date: moment(res.data[0].timestamp),
+          totalPay: res.data[0].total_cost,
+          totalWeight: res.data[0].total_weight,
+          companyName: res.data[0].custom_name,
+          companyCode: res.data[0].custom_code,
+          orderType: res.data[0].state,
+          type: res.data[0].type
         })
+      })
     }
   },
   mounted () {
@@ -306,6 +340,45 @@ export default {
     })
   },
   methods: {
+    downloadExl () {
+      var head = {
+        'A1': { 'v': '鸿泰黄金珠宝有限公司' },
+        'A2': { 'v': `${this.form.getFieldValue('orderType')[1]}单据` },
+        'A4': { 'v': '单号：' },
+        'B4': { 'v': '88888888' },
+        'F4': { 'v': '时间：' },
+        'G4': { 'v': `${this.form.getFieldValue('date').format('YYYY-MM-DD')}` },
+        'A5': { 'v': '客户' },
+        'B5': { 'v': '款式类别' },
+        'C5': { 'v': '成色' },
+        'D5': { 'v': '重量' },
+        'E5': { 'v': '单价' },
+        'F5': { 'v': '工费' },
+        'G5': { 'v': '备注' },
+        'C15': { 'v': '折足' },
+        'D15': { 'v': '888' },
+        'C16': { 'v': '合计' },
+        'D16': { 'v': '888' },
+        'G17': { 'v': '制表时间：123' },
+        '!merges':
+          [
+            // 第一行
+            {
+              's': { 'c': 0, 'r': 0 },
+              'e': { 'c': 6, 'r': 0 }
+            },
+            // 单据类型
+            {
+              's': { 'c': 0, 'r': 1 },
+              'e': { 'c': 6, 'r': 1 }
+            }
+          ]
+      }
+      var data = xlsxUtils.format2Sheet(Data, 0, 5, keyMap)
+      for (var k in head) data[k] = head[k]
+      var wb = xlsxUtils.format2WB(data, undefined, undefined, 'A1:G17')
+      saveAs(xlsxUtils.format2Blob(wb), '这里是下载的文件名.xlsx')
+    },
     setQuality (index, value, price) {
       this.data[+index - 1].quality = value
       this.data[+index - 1].unitPrice = price
@@ -321,36 +394,35 @@ export default {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
     orderTypeOnChange (value) {
-      this.$http.get(`/api/company?companyType=${value[0]}&orderType=${value[1]}`)
-        .then(res => {
-          if (res.status === 'success') {
-            this.companys = res.data
-            this.form.resetFields(['companyName', 'companyCode'])
-          }
-        })
+      this.$http.get(`/api/company?companyType=${value[0]}&orderType=${value[1]}`).then(res => {
+        if (res.status === 'success') {
+          this.companys = res.data
+          this.form.resetFields(['companyName', 'companyCode'])
+        }
+      })
     },
     findCompanyName (e) {
       if (!e.target.value) {
         return
       }
-      this.$http.get(`/api/company?code=${e.target.value}`)
-        .then(res => {
-          if (res.status === 'success') {
-            this.$http.get(`/api/company?companyType=${res.data[0].company_type}&orderType=${res.data[0].order_type}`)
-              .then(result => {
-                if (result.status === 'success') {
-                  this.companys = result.data
-                }
-              })
-            this.form.setFieldsValue({
-              orderType: [res.data[0].company_type, res.data[0].order_type]
+      this.$http.get(`/api/company?code=${e.target.value}`).then(res => {
+        if (res.status === 'success') {
+          this.$http
+            .get(`/api/company?companyType=${res.data[0].company_type}&orderType=${res.data[0].order_type}`)
+            .then(result => {
+              if (result.status === 'success') {
+                this.companys = result.data
+              }
             })
-            this.form.setFieldsValue({
-              companyName: res.data[0].name,
-              customType: res.data[0].type
-            })
-          }
-        })
+          this.form.setFieldsValue({
+            orderType: [res.data[0].company_type, res.data[0].order_type]
+          })
+          this.form.setFieldsValue({
+            companyName: res.data[0].name,
+            customType: res.data[0].type
+          })
+        }
+      })
     },
     moment,
     handleSubmit (e) {
@@ -358,7 +430,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           const dataList = []
-          this.data.map((value) => {
+          this.data.map(value => {
             if (value.editable) {
               this.$message.error('请先保存条目！')
               return
@@ -402,13 +474,16 @@ export default {
       this.data = newData
     },
     saveRow (record) {
+      let convertWeight = 0
       let totalPay = 0
       let totalWeight = 0
-      this.data.map((value) => {
+      this.data.map(value => {
+        convertWeight += parseFloat(value.convert)
         totalPay += parseFloat(value.pay)
         totalWeight += parseFloat(value.weight)
       })
       this.form.setFieldsValue({
+        convertWeight: convertWeight,
         totalPay: totalPay,
         totalWeight: totalWeight
       })
@@ -433,17 +508,6 @@ export default {
       target.editable = false
       target.isNew = false
       this.memberLoading = false
-      // 模拟网络请求、卡顿 800ms
-      // new Promise((resolve) => {
-      //   setTimeout(() => {
-      //     resolve({ loop: false })
-      //   }, 800)
-      // }).then(() => {
-      //   const target = this.data.filter(item => item.key === key)[0]
-      //   target.editable = false
-      //   target.isNew = false
-      //   this.memberLoading = false
-      // })
     },
     toggle (key) {
       const target = this.data.filter(item => item.key === key)[0]
@@ -460,13 +524,16 @@ export default {
     handleChange (value, key, column) {
       const newData = [...this.data]
       const target = newData.filter(item => key === item.key)[0]
+      const percent = +this.qualityOption.find((a) => { return a.name === target.quality }).percent / 100
       if (column === 'weight') {
         if (target.unitPrice) {
           const payNum = parseFloat(value) * parseFloat(target.unitPrice)
           if (!isNaN(payNum)) {
             target['pay'] = payNum.toFixed(2)
+            target['convert'] = value * percent
           } else {
-            target['pay'] = 0.00
+            target['pay'] = 0.0
+            target['convert'] = 0.0
           }
         }
       }
@@ -476,7 +543,7 @@ export default {
           if (!isNaN(payNum)) {
             target['pay'] = payNum.toFixed(2)
           } else {
-            target['pay'] = 0.00
+            target['pay'] = 0.0
           }
         }
       }
@@ -490,50 +557,50 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  .card{
-    margin-bottom: 24px;
+.card {
+  margin-bottom: 24px;
+}
+.popover-wrapper {
+  /deep/ .antd-pro-pages-forms-style-errorPopover .ant-popover-inner-content {
+    min-width: 256px;
+    max-height: 290px;
+    padding: 0;
+    overflow: auto;
   }
-  .popover-wrapper {
-    /deep/ .antd-pro-pages-forms-style-errorPopover .ant-popover-inner-content {
-      min-width: 256px;
-      max-height: 290px;
-      padding: 0;
-      overflow: auto;
-    }
+}
+.antd-pro-pages-forms-style-errorIcon {
+  user-select: none;
+  margin-right: 24px;
+  color: #f5222d;
+  cursor: pointer;
+  i {
+    margin-right: 4px;
+  }
+}
+.antd-pro-pages-forms-style-errorListItem {
+  padding: 8px 16px;
+  list-style: none;
+  border-bottom: 1px solid #e8e8e8;
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &:hover {
+    background: #e6f7ff;
   }
   .antd-pro-pages-forms-style-errorIcon {
-    user-select: none;
-    margin-right: 24px;
+    float: left;
+    margin-top: 4px;
+    margin-right: 12px;
+    padding-bottom: 22px;
     color: #f5222d;
-    cursor: pointer;
-    i {
-          margin-right: 4px;
-    }
   }
-  .antd-pro-pages-forms-style-errorListItem {
-    padding: 8px 16px;
-    list-style: none;
-    border-bottom: 1px solid #e8e8e8;
-    cursor: pointer;
-    transition: all .3s;
-
-    &:hover {
-      background: #e6f7ff;
-    }
-    .antd-pro-pages-forms-style-errorIcon {
-      float: left;
-      margin-top: 4px;
-      margin-right: 12px;
-      padding-bottom: 22px;
-      color: #f5222d;
-    }
-    .antd-pro-pages-forms-style-errorField {
-      margin-top: 2px;
-      color: rgba(0,0,0,.45);
-      font-size: 12px;
-    }
+  .antd-pro-pages-forms-style-errorField {
+    margin-top: 2px;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
   }
-  .ant-table-tbody > tr > td > span {
-    white-space: nowrap;
-  }
+}
+.ant-table-tbody > tr > td > span {
+  white-space: nowrap;
+}
 </style>

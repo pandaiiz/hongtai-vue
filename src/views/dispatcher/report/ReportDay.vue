@@ -25,9 +25,9 @@ const columns = [
     key: 'cp_weight'
   },
   {
-    title: '发货',
-    dataIndex: 'send_weight',
-    key: 'send_weight'
+    title: '半成品',
+    dataIndex: 'bcp_weight',
+    key: 'bcp_weight'
   },
   {
     title: '废品',
@@ -41,8 +41,8 @@ const columns = [
   },
   {
     title: '粉/线',
-    dataIndex: 'fx_weight',
-    key: 'fx_weight'
+    dataIndex: 'lost_fx_weight',
+    key: 'lost_fx_weight'
   },
   {
     title: '损耗',
@@ -50,7 +50,6 @@ const columns = [
     key: 'lost_weight'
   }
 ]
-
 const data = []
 
 export default {
