@@ -173,7 +173,8 @@
       <div style="margin-top: 16px; margin-bottom: 8px; float: right;">
         <a-button v-if="this.data.length < 6" type="dashed" @click="newMember">新增</a-button>
         <a-button @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
-        <a-button @click="downloadExl" type="primary" style="margin-left: 8px;">下载</a-button>
+        <a-button @click="reset" type="primary" style="margin-left: 8px;">重置</a-button>
+        <a-button v-if="idNo" @click="downloadExl" type="primary" style="margin-left: 8px;">下载</a-button>
       </div>
     </a-card>
   </div>
@@ -247,21 +248,22 @@ const columns = [
     scopedSlots: { customRender: 'operation' }
   }
 ]
-var Data =
-  [{
-    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-  }, {
-    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-  }, {
-    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-  }, {
-    'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-  }]
-var keyMap = ['customer', 'type', 'quality', 'weight', 'unitPrice', 'pay', 'remarks']// 通过设置数组让导出时可以按顺序显示
+// var Data =
+//   [{
+//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+//   }, {
+//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+//   }, {
+//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+//   }, {
+//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
+//   }]
+// 通过设置数组让导出时可以按顺序显示
 
 export default {
   data () {
     return {
+      idNo: '',
       priceList: [],
       companys: [],
       columns,
@@ -341,11 +343,25 @@ export default {
   },
   methods: {
     downloadExl () {
+      const Data = []
+      this.data.map((val) => {
+        Data.push({
+          customer: this.form.getFieldValue('companyName'),
+          type: val.productName,
+          quality: val.quality,
+          weight: val.weight,
+          unitPrice: val.unitPrice,
+          pay: val.pay,
+          remarks: val.remarks
+        })
+      })
+      const keyMap = ['customer', 'type', 'quality', 'weight', 'unitPrice', 'pay', 'remarks']
       var head = {
         'A1': { 'v': '鸿泰黄金珠宝有限公司' },
-        'A2': { 'v': `${this.form.getFieldValue('orderType')[1]}单据` },
+        'C2': { 'v': `${this.form.getFieldValue('orderType')[1]}` },
+        'E2': { 'v': '单据' },
         'A4': { 'v': '单号：' },
-        'B4': { 'v': '88888888' },
+        'B4': { 'v': `${this.idNo}` },
         'F4': { 'v': '时间：' },
         'G4': { 'v': `${this.form.getFieldValue('date').format('YYYY-MM-DD')}` },
         'A5': { 'v': '客户' },
@@ -356,10 +372,10 @@ export default {
         'F5': { 'v': '工费' },
         'G5': { 'v': '备注' },
         'C15': { 'v': '折足' },
-        'D15': { 'v': '888' },
+        'D15': { 'v': `${this.form.getFieldValue('convertWeight')}g` },
         'C16': { 'v': '合计' },
-        'D16': { 'v': '888' },
-        'G17': { 'v': '制表时间：123' },
+        'D16': { 'v': `${this.form.getFieldValue('totalWeight')}g` },
+        'G17': { 'v': `制表时间：${moment().format('YYYY-MM-DD HH:mm:ss')}` },
         '!merges':
           [
             // 第一行
@@ -369,8 +385,8 @@ export default {
             },
             // 单据类型
             {
-              's': { 'c': 0, 'r': 1 },
-              'e': { 'c': 6, 'r': 1 }
+              's': { 'c': 2, 'r': 1 },
+              'e': { 'c': 3, 'r': 1 }
             }
           ]
       }
@@ -407,20 +423,24 @@ export default {
       }
       this.$http.get(`/api/company?code=${e.target.value}`).then(res => {
         if (res.status === 'success') {
-          this.$http
-            .get(`/api/company?companyType=${res.data[0].company_type}&orderType=${res.data[0].order_type}`)
-            .then(result => {
-              if (result.status === 'success') {
-                this.companys = result.data
-              }
+          if (res.data.length > 0) {
+            this.$http
+              .get(`/api/company?companyType=${res.data[0].company_type}&orderType=${res.data[0].order_type}`)
+              .then(result => {
+                if (result.status === 'success') {
+                  this.companys = result.data
+                }
+              })
+            this.form.setFieldsValue({
+              orderType: [res.data[0].company_type, res.data[0].order_type]
             })
-          this.form.setFieldsValue({
-            orderType: [res.data[0].company_type, res.data[0].order_type]
-          })
-          this.form.setFieldsValue({
-            companyName: res.data[0].name,
-            customType: res.data[0].type
-          })
+            this.form.setFieldsValue({
+              companyName: res.data[0].name,
+              customType: res.data[0].type
+            })
+          } else {
+            this.$message.error('未查到此条用户编码')
+          }
         }
       })
     },
@@ -441,11 +461,14 @@ export default {
           this.$http.post('/api/order', values).then(res => {
             if (res.status === 'success') {
               this.$message.info('新增成功！')
-              this.form.resetFields()
+              this.idNo = res.id + 1000000
             }
           })
         }
       })
+    },
+    reset () {
+      this.form.resetFields()
     },
     newMember () {
       if (this.priceList.length === 0) {
@@ -465,6 +488,7 @@ export default {
         name: '',
         workId: '',
         department: '',
+        remarks: '',
         editable: true,
         isNew: true
       })
@@ -483,9 +507,9 @@ export default {
         totalWeight += parseFloat(value.weight)
       })
       this.form.setFieldsValue({
-        convertWeight: convertWeight,
-        totalPay: totalPay,
-        totalWeight: totalWeight
+        convertWeight: convertWeight.toFixed(2),
+        totalPay: totalPay.toFixed(2),
+        totalWeight: totalWeight.toFixed(2)
       })
       this.memberLoading = true
       const { key, productName, quality, weight } = record
@@ -524,8 +548,12 @@ export default {
     handleChange (value, key, column) {
       const newData = [...this.data]
       const target = newData.filter(item => key === item.key)[0]
-      const percent = +this.qualityOption.find((a) => { return a.name === target.quality }).percent / 100
       if (column === 'weight') {
+        if (!target.quality) {
+          this.$message.error('请先选择货品！')
+          return
+        }
+        const percent = +this.qualityOption.find((a) => { return a.name === target.quality }).percent / 100
         if (target.unitPrice) {
           const payNum = parseFloat(value) * parseFloat(target.unitPrice)
           if (!isNaN(payNum)) {

@@ -61,7 +61,6 @@
         </div>
       </template>
     </s-table>
-
     <a-drawer
       title="新建收发"
       :width="900"
@@ -73,10 +72,11 @@
           <a-col :span="12">
             <a-form-item label="ID">
               <a-input
+                @blur="scanning"
                 placeholder="请输入ID"
                 v-decorator="[
                   'id', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入ID' }]}
+                  {rules: [{ required: true, message: '请输入ID' }], initialValue: '9999' }
                 ]"
               />
             </a-form-item>
@@ -352,6 +352,26 @@ export default {
       })
   },
   methods: {
+    scanning (e) {
+      this.$http.get(`/api/scanning?id=${e.target.value}`).then(res => {
+        if (res.data.length > 0) {
+          this.form.setFieldsValue({
+            number: res.data[0].number,
+            weight: res.data[0].weight,
+            remarks: res.data[0].remarks,
+            department: res.data[0].department,
+            category: res.data[0].category,
+            quality: res.data[0].quality,
+            product: res.data[0].product,
+            type: res.data[0].type,
+            store: res.data[0].store
+          })
+        } else {
+          this.form.resetFields(['number', 'weight', 'remarks', 'department', 'category', 'quality', 'product', 'type', 'store'])
+          // console.log(res.status)
+        }
+      })
+    },
     moment,
     supplementData () {
       this.supplementDate = true
@@ -364,7 +384,7 @@ export default {
       this.form.setFieldsValue({
         weight: '读取中...'
       })
-      this.$http.get(`/collecter/weight/${this.balancePort}`).then(res => {
+      this.$http.get(`collecter/weight/${this.balancePort}`).then(res => {
         if (res.state === 'error') {
           setTimeout(() => {
             this.readWeight()
@@ -397,11 +417,11 @@ export default {
     },
     showDrawer () {
       this.visible = true
-      setTimeout(() => {
-        this.form.setFieldsValue({
-          id: 9999
-        })
-      }, 0)
+      // setTimeout(() => {
+      //   this.form.setFieldsValue({
+      //     id: 9999
+      //   })
+      // }, 0)
     },
     onClose () {
       this.visible = false
