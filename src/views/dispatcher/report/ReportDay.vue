@@ -40,11 +40,6 @@ const columns = [
     key: 'th_weight'
   },
   {
-    title: '粉/线',
-    dataIndex: 'lost_fx_weight',
-    key: 'lost_fx_weight'
-  },
-  {
     title: '损耗',
     dataIndex: 'lost_weight',
     key: 'lost_weight'
@@ -64,6 +59,7 @@ export default {
     moment,
     onChange (date, dateString) {
       getStatistics({ type: 'date', time: dateString }).then(res => {
+        console.log(res.data)
         this.data = res.data
       })
     }

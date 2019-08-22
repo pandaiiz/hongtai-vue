@@ -42,6 +42,11 @@
           <template v-else>{{ text }}</template>
         </div>
       </template>
+      <template slot="id" slot-scope="text">
+        <router-link :to="{ name:'SendTimeline', query: { id: text } }">
+          {{ text }}
+        </router-link>
+      </template>
       <template slot="action" slot-scope="text, record">
         <div class="editable-row-operations">
           <span v-if="record.editable">
@@ -52,8 +57,6 @@
             </a-popconfirm>
           </span>
           <span v-else>
-            <!-- <a class="edit" @click="() => edit(record)">修改</a>
-            <a-divider type="vertical" /> -->
             <a class="fill" @click="() => fill(record)">填充</a>
             <a-divider type="vertical" />
             <a class="delete" @click="() => del(record)">删除</a>
@@ -70,18 +73,42 @@
       <a-form :form="form" layout="vertical" hideRequiredMark @submit="handleSubmit">
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="ID">
+            <a-form-item label="传递单ID">
               <a-input
                 @blur="scanning"
                 placeholder="请输入ID"
                 v-decorator="[
                   'id', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入ID' }], initialValue: '9999' }
+                  {rules: [{ required: true, message: '请输入ID' }] }
                 ]"
               />
             </a-form-item>
           </a-col>
           <a-col :span="12">
+            <a-form-item label="员工">
+              <a-input
+                @blur="loadStaff"
+                placeholder="请输入员工ID"
+                v-decorator="[
+                  'staff',
+                  {rules: [{ required: true, message: '请输入员工ID' }] }
+                ]"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="部门">
+              <a-select
+                v-decorator="[
+                  'department', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请选择员工' }]}
+                ]"
+                :options="options"
+                placeholder="请选择员工"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
             <a-form-item label="件数">
               <a-input
                 placeholder="请输入件数"
@@ -92,7 +119,7 @@
               />
             </a-form-item>
           </a-col>
-          <a-col :span="12">
+          <a-col :span="6">
             <a-form-item label="重量">
               <a-input
                 v-decorator="[
@@ -106,18 +133,21 @@
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="备注">
-              <a-input
+            <a-form-item label="类型">
+              <a-radio-group
+                buttonStyle="solid"
                 v-decorator="[
-                  'remarks'
-                ]"
-                placeholder="请输入备注"
-              />
+                  'type',
+                  {rules: [{ required: true, message: '请选择发货类型' }]}
+                ]">
+                <a-radio-button value="send">发货</a-radio-button>
+                <a-radio-button value="receive">收货</a-radio-button>
+              </a-radio-group>
             </a-form-item>
           </a-col>
         </a-row>
         <a-row :gutter="16">
-          <a-col :span="24">
+          <!-- <a-col :span="24">
             <a-form-item label="部门">
               <a-radio-group
                 buttonStyle="solid"
@@ -128,8 +158,8 @@
                 <a-radio-button v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
-          </a-col>
-          <a-col :span="24">
+          </a-col> -->
+          <!-- <a-col :span="24">
             <a-form-item label="仓库">
               <a-radio-group
                 buttonStyle="solid"
@@ -140,7 +170,7 @@
                 <a-radio-button v-for="item in listData.store" :key="item" :value="item">{{ item }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
-          </a-col>
+          </a-col> -->
           <a-col :span="24">
             <a-form-item label="类别">
               <a-radio-group
@@ -177,25 +207,23 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
-          <a-col :span="12">
-            <a-form-item label="类型">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'type',
-                  {rules: [{ required: true, message: '请选择发货类型' }]}
-                ]">
-                <a-radio-button value="send">发货</a-radio-button>
-                <a-radio-button value="receive">收货</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
           <a-col :span="12" v-if="supplementDate">
             <a-form-item label="补录日期">
               <a-date-picker
                 v-decorator="[
                   'supplementDate'
                 ]"/>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24" v-if="showRemarks">
+            <a-form-item label="备注">
+              <a-textarea
+                v-decorator="[
+                  'remarks'
+                ]"
+                placeholder="请输入备注"
+                autosize
+              />
             </a-form-item>
           </a-col>
         </a-row>
@@ -213,6 +241,11 @@
         >
           <a-button
             :style="{marginRight: '8px'}"
+            @click="showRemarksToggle">
+            备注
+          </a-button>
+          <a-button
+            :style="{marginRight: '8px'}"
             @click="supplementData">
             补录
           </a-button>
@@ -226,7 +259,6 @@
         </div>
       </a-form>
     </a-drawer>
-
   </a-card>
 </template>
 
@@ -242,11 +274,11 @@ export default {
   },
   data () {
     return {
+      showRemarks: false,
+      options: [],
       dateFormat: 'YYYY/MM/DD',
       visible: false,
       supplementDate: false,
-      // 高级搜索 展开/关闭
-      advanced: true,
       // 查询参数
       queryParam: {
         date: [moment(), moment()]
@@ -349,32 +381,58 @@ export default {
     getInfoList()
       .then(res => {
         this.listData = res
+        const options = []
+        res.department.map((val) => { options.push({ value: val, label: val, isLeaf: false }) })
+        this.options = options
       })
   },
   methods: {
+    showRemarksToggle () {
+      this.showRemarks = !this.showRemarks
+    },
+    loadStaff (e) {
+      if (!e.target.value) {
+        return
+      }
+      this.$http.get(`/api/staff?code=${e.target.value}`).then(res => {
+        this.form.setFieldsValue({
+          department: res.data[0].department,
+          staff: res.data[0].name
+        })
+        this.$notification.open({
+          message: `姓名：${res.data[0].name}`,
+          description: `部门：${res.data[0].department}`,
+          icon: <a-icon type="smile" style="color: #108ee9" />,
+          duration: 6,
+          placement: 'topLeft'
+        })
+      })
+    },
     scanning (e) {
       this.$http.get(`/api/scanning?id=${e.target.value}`).then(res => {
         if (res.data.length > 0) {
+          if (res.data[0].remarks) {
+            this.showRemarks = true
+            setTimeout(() => {
+              this.form.setFieldsValue({
+                remarks: res.data[0].remarks
+              })
+            }, 0)
+          }
           this.form.setFieldsValue({
             number: res.data[0].number,
             weight: res.data[0].weight,
-            remarks: res.data[0].remarks,
-            department: res.data[0].department,
-            category: res.data[0].category,
             quality: res.data[0].quality,
-            product: res.data[0].product,
-            type: res.data[0].type,
-            store: res.data[0].store
+            product: res.data[0].product
           })
         } else {
           this.form.resetFields(['number', 'weight', 'remarks', 'department', 'category', 'quality', 'product', 'type', 'store'])
-          // console.log(res.status)
         }
       })
     },
     moment,
     supplementData () {
-      this.supplementDate = true
+      this.supplementDate = !this.supplementDate
     },
     setBalance (port) {
       this.balancePort = port
@@ -408,6 +466,7 @@ export default {
     clearSubmit () {
       this.form.resetFields()
       this.supplementDate = false
+      this.showRemarks = false
     },
     onChange (date, dateString) {
       this.queryParam.date = {
@@ -417,11 +476,6 @@ export default {
     },
     showDrawer () {
       this.visible = true
-      // setTimeout(() => {
-      //   this.form.setFieldsValue({
-      //     id: 9999
-      //   })
-      // }, 0)
     },
     onClose () {
       this.visible = false
@@ -450,25 +504,26 @@ export default {
     fill (row) {
       this.visible = true
       setTimeout(() => {
+        if (row.remarks) {
+          this.showRemarks = true
+          setTimeout(() => {
+            this.form.setFieldsValue({
+              remarks: row.remarks
+            })
+          }, 0)
+        }
         this.form.setFieldsValue({
           id: row.id,
           number: row.number,
           weight: row.weight,
-          remarks: row.remarks,
-          department: row.department,
-          category: row.category,
           quality: row.quality,
-          product: row.product,
-          type: row.type,
-          store: row.store
+          product: row.product
         })
       }, 0)
     },
     edit (row) {
       row.editable = true
-      // row = Object.assign({}, row)
     },
-    // eslint-disable-next-line
     del (row) {
       const $this = this
       this.$confirm({
@@ -494,20 +549,13 @@ export default {
     save (row) {
       row.editable = false
       this.$http.put('/api/machining', row).then(res => {
-        console.log(res)
         if (res.status === 'success') {
           this.$message.info('修改成功！')
-          // this.visible = false
-          // this.form.resetFields()
-          // this.$refs.table.refresh()
         }
       })
     },
     cancel (row) {
       row.editable = false
-    },
-    toggleAdvanced () {
-      this.advanced = !this.advanced
     }
   }
 }

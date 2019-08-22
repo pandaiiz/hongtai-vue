@@ -20,9 +20,25 @@ export const asyncRouterMap = [
         children: [
           {
             path: '/dispatcher/send-receive',
-            name: 'EditList',
-            component: () => import('@/views/dispatcher/send/SendReceive'),
-            meta: { title: '收发管理', keepAlive: false }
+            name: 'SendReceive',
+            component: () => import('@/views/dispatcher/send/SendLayout'),
+            meta: { title: '收发管理', permission: [ 'profile' ] },
+            redirect: '/dispatcher/send/send-receive',
+            hideChildrenInMenu: true,
+            children: [
+              {
+                path: '/dispatcher/send/send-receive',
+                name: 'EditList',
+                component: () => import('@/views/dispatcher/send/SendReceive'),
+                meta: { title: '收发管理', permission: [ 'profile' ] }
+              },
+              {
+                path: '/dispatcher/send/timeline',
+                name: 'SendTimeline',
+                component: () => import('@/views/dispatcher/send/SendTimeline'),
+                meta: { title: '收发时间轴', permission: [ 'profile' ] }
+              }
+            ]
           },
           {
             path: '/dispatcher/report',
@@ -134,6 +150,18 @@ export const asyncRouterMap = [
             name: 'PriceList',
             component: () => import('@/views/setting/PriceList'),
             meta: { title: '价格明细', permission: [ 'profile' ], keepAlive: false }
+          },
+          {
+            path: '/setting/staff',
+            name: 'Staff',
+            component: () => import('@/views/setting/Staff'),
+            meta: { title: '员工录入', permission: [ 'profile' ], keepAlive: false }
+          },
+          {
+            path: '/setting/staff/list',
+            name: 'StaffList',
+            component: () => import('@/views/setting/StaffList'),
+            meta: { title: '员工列表', permission: [ 'profile' ], keepAlive: false }
           }
         ]
       }

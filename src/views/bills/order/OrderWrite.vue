@@ -172,7 +172,7 @@
       </a-table>
       <div style="margin-top: 16px; margin-bottom: 8px; float: right;">
         <a-button v-if="this.data.length < 6" type="dashed" @click="newMember">新增</a-button>
-        <a-button @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
+        <a-button v-if="!$route.query.id" @click="handleSubmit" type="primary" style="margin-left: 8px;">提交</a-button>
         <a-button @click="reset" type="primary" style="margin-left: 8px;">重置</a-button>
         <a-button v-if="idNo" @click="downloadExl" type="primary" style="margin-left: 8px;">下载</a-button>
       </div>
@@ -248,18 +248,6 @@ const columns = [
     scopedSlots: { customRender: 'operation' }
   }
 ]
-// var Data =
-//   [{
-//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-//   }, {
-//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-//   }, {
-//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-//   }, {
-//     'customer': '鸿泰', 'type': '板料', 'quality': '千足金', 'weight': '22', 'unitPrice': '2', 'pay': '999', 'remarks': '测试测试'
-//   }]
-// 通过设置数组让导出时可以按顺序显示
-
 export default {
   data () {
     return {
@@ -324,13 +312,15 @@ export default {
     if (this.$route.query.id) {
       this.$http.get(`/api/order?id=${this.$route.query.id}`).then(res => {
         this.data = JSON.parse(res.data[0].info)
+        this.idNo = res.data[0].key + 1000000
         this.form.setFieldsValue({
           date: moment(res.data[0].timestamp),
           totalPay: res.data[0].total_cost,
           totalWeight: res.data[0].total_weight,
           companyName: res.data[0].custom_name,
           companyCode: res.data[0].custom_code,
-          orderType: res.data[0].state,
+          orderType: [res.data[0].custom_type, res.data[0].order_type],
+          convertWeight: res.data[0].convert_weight,
           type: res.data[0].type
         })
       })
@@ -375,6 +365,10 @@ export default {
         'D15': { 'v': `${this.form.getFieldValue('convertWeight')}g` },
         'C16': { 'v': '合计' },
         'D16': { 'v': `${this.form.getFieldValue('totalWeight')}g` },
+        'A17': { 'v': '交货人：' },
+        'B17': { 'v': '收货人：' },
+        'D17': { 'v': '制单：' },
+        'E17': { 'v': '翁静霞' },
         'G17': { 'v': `制表时间：${moment().format('YYYY-MM-DD HH:mm:ss')}` },
         '!merges':
           [
@@ -461,6 +455,7 @@ export default {
           this.$http.post('/api/order', values).then(res => {
             if (res.status === 'success') {
               this.$message.info('新增成功！')
+              console.log(res)
               this.idNo = res.id + 1000000
             }
           })
