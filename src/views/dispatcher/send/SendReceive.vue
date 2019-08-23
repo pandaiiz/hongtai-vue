@@ -442,7 +442,7 @@ export default {
       this.form.setFieldsValue({
         weight: '读取中...'
       })
-      this.$http.get(`collecter/weight/${this.balancePort}`).then(res => {
+      this.$http.get(`/collecter/weight/${this.balancePort}`).then(res => {
         if (res.state === 'error') {
           setTimeout(() => {
             this.readWeight()
