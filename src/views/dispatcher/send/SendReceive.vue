@@ -30,6 +30,7 @@
       size="middle"
       :scroll="{ x : true }"
       :columns="columns"
+      :showPagination="false"
       :data="loadData">
       <template v-for="(col, index) in columns" :slot="col.dataIndex" slot-scope="text, record">
         <div :key="index" v-if="col.scopedSlots">
@@ -64,6 +65,46 @@
         </div>
       </template>
     </s-table>
+    <!-- <s-table
+      ref="table"
+      size="middle"
+      :scroll="{ x : true }"
+      :columns="columns"
+      :showPagination="false"
+      :data="loadData">
+      <template v-for="(col, index) in columns" :slot="col.dataIndex" slot-scope="text, record">
+        <div :key="index" v-if="col.scopedSlots">
+          <a-input
+            v-if="record.editable"
+            style="margin: -5px 0"
+            :value="text"
+            @change="e => handleChange(e.target.value, record.key, col, record)"
+          />
+          <template v-else>{{ text }}</template>
+        </div>
+      </template>
+      <template slot="id" slot-scope="text">
+        <router-link :to="{ name:'SendTimeline', query: { id: text } }">
+          {{ text }}
+        </router-link>
+      </template>
+      <template slot="action" slot-scope="text, record">
+        <div class="editable-row-operations">
+          <span v-if="record.editable">
+            <a @click="() => save(record)">保存</a>
+            <a-divider type="vertical" />
+            <a-popconfirm title="真的放弃编辑吗?" @confirm="() => cancel(record)">
+              <a>取消</a>
+            </a-popconfirm>
+          </span>
+          <span v-else>
+            <a class="fill" @click="() => fill(record)">填充</a>
+            <a-divider type="vertical" />
+            <a class="delete" @click="() => del(record)">删除</a>
+          </span>
+        </div>
+      </template>
+    </s-table> -->
     <a-drawer
       title="新建收发"
       :width="900"
@@ -101,7 +142,7 @@
               <a-select
                 v-decorator="[
                   'department', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请选择员工' }]}
+                  {rules: [{ required: true, message: '请选择部门' }]}
                 ]"
                 :options="options"
                 placeholder="请选择员工"
@@ -517,7 +558,9 @@ export default {
           number: row.number,
           weight: row.weight,
           quality: row.quality,
-          product: row.product
+          product: row.product,
+          staff: row.staff,
+          department: row.department
         })
       }, 0)
     },

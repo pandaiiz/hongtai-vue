@@ -71,6 +71,50 @@ export const asyncRouterMap = [
       },
       // in and out 单据
       {
+        path: '/inventory',
+        name: 'Inventory',
+        component: RouteView,
+        redirect: '/inventory/main',
+        meta: { title: '盘点', icon: 'profile', permission: [ 'profile' ] },
+        children: [
+          {
+            path: '/inventory/main',
+            name: 'InventoryMain',
+            component: () => import('@/views/inventory/main/BillsList'),
+            meta: { title: '盘点详情', permission: [ 'profile' ] }
+          }
+          // {
+          //   path: '/bills/order',
+          //   name: 'BillsOrder',
+          //   component: () => import('@/views/bills/order/OrderLayout'),
+          //   meta: { title: '出入库单', keepAlive: false },
+          //   redirect: '/bills/order/list',
+          //   hideChildrenInMenu: true,
+          //   children: [
+          //     {
+          //       path: '/bills/order/write',
+          //       name: 'BillsWriteOrder',
+          //       component: () => import('@/views/bills/order/OrderWrite'),
+          //       meta: { title: '出入库单', keepAlive: false }
+          //     },
+          //     {
+          //       path: '/bills/order/list',
+          //       name: 'BillsOrderList',
+          //       component: () => import('@/views/bills/order/OrderList'),
+          //       meta: { title: '单据列表', keepAlive: false }
+          //     }
+          //   ]
+          // },
+          // {
+          //   path: '/report/supplier',
+          //   name: 'ReportSupplier',
+          //   component: () => import('@/views/report/supplier/ReportSupplier'),
+          //   meta: { title: '供应商出入明细', permission: [ 'profile' ] }
+          // }
+        ]
+      },
+      // 盘点 Inventory
+      {
         path: '/bills',
         name: 'Bills',
         component: RouteView,
