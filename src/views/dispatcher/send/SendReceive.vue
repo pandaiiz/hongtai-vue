@@ -1,571 +1,203 @@
 <template>
-  <a-card :bordered="false">
-    <a-row :span="24">
-      <a-col :span="24">
-        <a-range-picker
-          v-model="queryParam.date"
-          :format="dateFormat"
-        />
-        <a-select defaultValue="lucy" style="width: 120px;margin-left: 8px" v-model="queryParam.department">
-          <a-select-option v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-select-option>
-        </a-select>
-        <a-button style="margin-left: 8px" type="danger" @click="() => queryParam = {}">
-          <a-icon type="redo" />重置
-        </a-button>
-        <a-button style="margin-left: 8px" type="default" @click="$refs.table.refresh(true)">
-          <a-icon type="search" /> 查询
-        </a-button>
-        <a-button style="margin-left: 8px" type="primary" @click="showDrawer">
-          <a-icon type="plus" /> 新增
-        </a-button>
-        <a-select style="margin-left: 8px" defaultValue="port1" :value="balancePort" @change="setBalance">
-          <a-select-option value="port1">1号秤</a-select-option>
-          <a-select-option value="port2">2号秤</a-select-option>
-        </a-select>
-      </a-col>
-    </a-row>
-    <br />
-    <s-table
-      ref="table"
-      size="middle"
-      :scroll="{ x : true }"
-      :columns="columns"
-      :showPagination="false"
-      :data="loadData">
-      <template v-for="(col, index) in columns" :slot="col.dataIndex" slot-scope="text, record">
-        <div :key="index" v-if="col.scopedSlots">
-          <a-input
-            v-if="record.editable"
-            style="margin: -5px 0"
-            :value="text"
-            @change="e => handleChange(e.target.value, record.key, col, record)"
+  <div>
+    <a-card :bordered="false">
+      <a-row :span="24">
+        <a-col :span="24">
+          <a-range-picker
+            @change="queryData"
+            v-model="queryParam.date"
+            :format="dateFormat"
           />
-          <template v-else>{{ text }}</template>
-        </div>
-      </template>
-      <template slot="id" slot-scope="text">
-        <router-link :to="{ name:'SendTimeline', query: { id: text } }">
-          {{ text }}
-        </router-link>
-      </template>
-      <template slot="action" slot-scope="text, record">
-        <div class="editable-row-operations">
-          <span v-if="record.editable">
-            <a @click="() => save(record)">保存</a>
-            <a-divider type="vertical" />
-            <a-popconfirm title="真的放弃编辑吗?" @confirm="() => cancel(record)">
-              <a>取消</a>
-            </a-popconfirm>
-          </span>
-          <span v-else>
-            <a class="fill" @click="() => fill(record)">填充</a>
-            <a-divider type="vertical" />
-            <a class="delete" @click="() => del(record)">删除</a>
-          </span>
-        </div>
-      </template>
-    </s-table>
-    <!-- <s-table
-      ref="table"
-      size="middle"
-      :scroll="{ x : true }"
-      :columns="columns"
-      :showPagination="false"
-      :data="loadData">
-      <template v-for="(col, index) in columns" :slot="col.dataIndex" slot-scope="text, record">
-        <div :key="index" v-if="col.scopedSlots">
-          <a-input
-            v-if="record.editable"
-            style="margin: -5px 0"
-            :value="text"
-            @change="e => handleChange(e.target.value, record.key, col, record)"
-          />
-          <template v-else>{{ text }}</template>
-        </div>
-      </template>
-      <template slot="id" slot-scope="text">
-        <router-link :to="{ name:'SendTimeline', query: { id: text } }">
-          {{ text }}
-        </router-link>
-      </template>
-      <template slot="action" slot-scope="text, record">
-        <div class="editable-row-operations">
-          <span v-if="record.editable">
-            <a @click="() => save(record)">保存</a>
-            <a-divider type="vertical" />
-            <a-popconfirm title="真的放弃编辑吗?" @confirm="() => cancel(record)">
-              <a>取消</a>
-            </a-popconfirm>
-          </span>
-          <span v-else>
-            <a class="fill" @click="() => fill(record)">填充</a>
-            <a-divider type="vertical" />
-            <a class="delete" @click="() => del(record)">删除</a>
-          </span>
-        </div>
-      </template>
-    </s-table> -->
-    <a-drawer
-      title="新建收发"
-      :width="900"
-      @close="onClose"
-      :visible="visible"
-      :wrapStyle="{height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px'}">
-      <a-form :form="form" layout="vertical" hideRequiredMark @submit="handleSubmit">
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-form-item label="传递单ID">
-              <a-input
-                @blur="scanning"
-                placeholder="请输入ID"
-                v-decorator="[
-                  'id', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入ID' }] }
-                ]"
-              />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="员工">
-              <a-input
-                @blur="loadStaff"
-                placeholder="请输入员工ID"
-                v-decorator="[
-                  'staff',
-                  {rules: [{ required: true, message: '请输入员工ID' }] }
-                ]"
-              />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="部门">
-              <a-select
-                v-decorator="[
-                  'department', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请选择部门' }]}
-                ]"
-                :options="options"
-                placeholder="请选择员工"
-              />
-            </a-form-item>
-          </a-col>
-          <a-col :span="6">
-            <a-form-item label="件数">
-              <a-input
-                placeholder="请输入件数"
-                v-decorator="[
-                  'number', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入件数' }]}
-                ]"
-              />
-            </a-form-item>
-          </a-col>
-          <a-col :span="6">
-            <a-form-item label="重量">
-              <a-input
-                v-decorator="[
-                  'weight', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请读取重量' }]}
-                ]"
-                placeholder="请读取重量"
-                size="default">
-                <a-icon slot="addonAfter" type="setting" @click="readWeight"/>
-              </a-input>
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="类型">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'type',
-                  {rules: [{ required: true, message: '请选择发货类型' }]}
-                ]">
-                <a-radio-button value="send">发货</a-radio-button>
-                <a-radio-button value="receive">收货</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <!-- <a-col :span="24">
-            <a-form-item label="部门">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'department',
-                  {rules: [{ required: true, message: '请选择部门' }]}
-                ]">
-                <a-radio-button v-for="item in listData.department" :key="item" :value="item">{{ item }}</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col> -->
-          <!-- <a-col :span="24">
-            <a-form-item label="仓库">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'store',
-                  {rules: [{ required: true, message: '请选择仓库' }]}
-                ]">
-                <a-radio-button v-for="item in listData.store" :key="item" :value="item">{{ item }}</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col> -->
-          <a-col :span="24">
-            <a-form-item label="类别">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'category',
-                  {rules: [{ required: true, message: '请选择类别' }]}
-                ]">
-                <a-radio-button v-for="item in listData.category" :key="item" :value="item">{{ item }}</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="24">
-            <a-form-item label="成色">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'quality',
-                  {rules: [{ required: true, message: '请选择成色' }]}
-                ]">
-                <a-radio-button v-for="item in listData.quality" :key="item.name" :value="item.name">{{ item.name }}</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="24">
-            <a-form-item label="产品">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'product',
-                  {rules: [{ required: true, message: '请选择产品' }]}
-                ]">
-                <a-radio-button v-for="item in listData.product" :key="item" :value="item">{{ item }}</a-radio-button>
-              </a-radio-group>
-            </a-form-item>
-          </a-col>
-          <a-col :span="12" v-if="supplementDate">
-            <a-form-item label="补录日期">
-              <a-date-picker
-                v-decorator="[
-                  'supplementDate'
-                ]"/>
-            </a-form-item>
-          </a-col>
-          <a-col :span="24" v-if="showRemarks">
-            <a-form-item label="备注">
-              <a-textarea
-                v-decorator="[
-                  'remarks'
-                ]"
-                placeholder="请输入备注"
-                autosize
-              />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <div
-          :style="{
-            position: 'absolute',
-            left: 0,
-            bottom: 0,
-            width: '100%',
-            borderTop: '1px solid #e9e9e9',
-            padding: '10px 16px',
-            background: '#fff',
-            textAlign: 'right',
-          }"
-        >
-          <a-button
-            :style="{marginRight: '8px'}"
-            @click="showRemarksToggle">
-            备注
-          </a-button>
-          <a-button
-            :style="{marginRight: '8px'}"
-            @click="supplementData">
-            补录
-          </a-button>
-          <a-button :style="{marginRight: '8px'}" @click="clearSubmit" type="danger">
-            重置
-          </a-button>
-          <a-button :style="{marginRight: '8px'}" @click="onClose" type="default">
-            关闭
-          </a-button>
-          <a-button html-type="submit" type="primary">提交</a-button>
-        </div>
-      </a-form>
-    </a-drawer>
-  </a-card>
+          <send-drawer :fillData.sync="fillData" :visible.sync="visible" :balancePort="balancePort" @refresh="refreshTable"></send-drawer>
+          <a-select style="margin-left: 8px" defaultValue="port1" :value="balancePort" @change="setBalancePort">
+            <a-select-option value="port1">1号秤</a-select-option>
+            <a-select-option value="port2">2号秤</a-select-option>
+          </a-select>
+        </a-col>
+      </a-row>
+      <br />
+      <a-table
+        size="middle"
+        :scroll="{ x: true }"
+        :columns="columns"
+        :pagination="false"
+        :dataSource="data">
+        <template slot="id" slot-scope="text">
+          <!-- <router-link :to="{ name:'SendTimeline', query: { id: text } }"> -->
+          <!-- {{ text }} -->
+          <!-- </router-link> -->
+          <a @click="changeView(text)">
+            {{ text }}
+          </a>
+        </template>
+        <template slot="action" slot-scope="text, record">
+          <div class="editable-row-operations">
+            <span>
+              <a class="fill" @click="() => fill(record)">填充</a>
+              <a-divider type="vertical" />
+              <a class="delete" @click="() => del(record)">删除</a>
+            </span>
+          </div>
+        </template>
+      </a-table>
+    </a-card>
+    <send-time-line :details.sync="details" :detailsId="detailsId"></send-time-line>
+  </div>
 </template>
 
 <script>
-import { STable } from '@/components'
 import { getDataList, getInfoList } from '@/api/manage'
 import moment from 'moment'
+import SendDrawer from './SendDrawer'
+import SendTimeLine from './SendTimeline'
 
 export default {
-  name: 'TableList',
   components: {
-    STable
+    SendDrawer,
+    SendTimeLine
   },
   data () {
     return {
-      showRemarks: false,
-      options: [],
-      dateFormat: 'YYYY/MM/DD',
+      detailsId: '',
+      details: false,
       visible: false,
-      supplementDate: false,
-      // 查询参数
+      dateFormat: 'YYYY/MM/DD',
+      fillData: {},
       queryParam: {
         date: [moment(), moment()]
       },
-      submitParam: {},
       balancePort: '',
-      weight: '',
-      form: this.$form.createForm(this),
-      listData: {},
       // 表头
-      columns: [
-        {
-          align: 'center',
-          title: 'ID',
-          dataIndex: 'id',
-          scopedSlots: { customRender: 'id' }
-        },
-        {
-          align: 'center',
-          title: '部门',
-          dataIndex: 'department',
-          scopedSlots: { customRender: 'department' }
-        },
-        {
-          align: 'center',
-          title: '类别',
-          dataIndex: 'category',
-          scopedSlots: { customRender: 'category' }
-          // customRender: (text) => text + ' 次'
-        },
-        {
-          align: 'center',
-          title: '类型',
-          dataIndex: 'type',
-          customRender: (type) => type === 'send' ? <div>发货</div> : <div>收货</div>
-        },
-        {
-          align: 'center',
-          title: '成色',
-          dataIndex: 'quality',
-          scopedSlots: { customRender: 'quality' }
-        },
-        {
-          align: 'center',
-          title: '产品',
-          dataIndex: 'product',
-          scopedSlots: { customRender: 'product' }
-        },
-        {
-          align: 'center',
-          title: '重量(g)',
-          dataIndex: 'weight',
-          scopedSlots: { customRender: 'weight' }
-        },
-        {
-          align: 'center',
-          title: '件数',
-          dataIndex: 'number',
-          scopedSlots: { customRender: 'number' }
-        },
-        {
-          align: 'center',
-          title: '备注',
-          dataIndex: 'remarks',
-          scopedSlots: { customRender: 'remarks' }
-        },
-        {
-          width: '120px',
-          align: 'center',
-          title: '时间',
-          dataIndex: 'timestamp',
-          fixed: 'right',
-          customRender: (time) => { return <div>{moment(time).format('YYYY-MM-DD HH:mm:ss')}</div> }
-        },
-        {
-          width: '100px',
-          align: 'center',
-          table: '操作',
-          dataIndex: 'action',
-          fixed: 'right',
-          scopedSlots: { customRender: 'action' }
-        }
-      ],
-      // 加载数据方法 必须为 Promise 对象
-      loadData: parameter => {
-        return getDataList(Object.assign(parameter, this.queryParam))
-          .then(res => {
-            res.result.data.map((val) => {
-              val['editable'] = false
-            })
-            return res.result
-          })
-      },
-      selectedRows: []
+      columns: [],
+      data: []
     }
   },
   created () {
     const port = window.localStorage.getItem('port')
     this.balancePort = port
-    getInfoList()
-      .then(res => {
-        this.listData = res
-        const options = []
-        res.department.map((val) => { options.push({ value: val, label: val, isLeaf: false }) })
-        this.options = options
-      })
+    getDataList(this.queryParam).then(res => { this.data = res.data })
+    this.initHeaderFilter()
   },
   methods: {
-    showRemarksToggle () {
-      this.showRemarks = !this.showRemarks
-    },
-    loadStaff (e) {
-      if (!e.target.value) {
-        return
-      }
-      this.$http.get(`/api/staff?code=${e.target.value}`).then(res => {
-        this.form.setFieldsValue({
-          department: res.data[0].department,
-          staff: res.data[0].name
-        })
-        this.$notification.open({
-          message: `姓名：${res.data[0].name}`,
-          description: `部门：${res.data[0].department}`,
-          icon: <a-icon type="smile" style="color: #108ee9" />,
-          duration: 6,
-          placement: 'topLeft'
-        })
-      })
-    },
-    scanning (e) {
-      this.$http.get(`/api/scanning?id=${e.target.value}`).then(res => {
-        if (res.data.length > 0) {
-          if (res.data[0].remarks) {
-            this.showRemarks = true
-            setTimeout(() => {
-              this.form.setFieldsValue({
-                remarks: res.data[0].remarks
-              })
-            }, 0)
-          }
-          this.form.setFieldsValue({
-            number: res.data[0].number,
-            weight: res.data[0].weight,
-            quality: res.data[0].quality,
-            product: res.data[0].product
-          })
-        } else {
-          this.form.resetFields(['number', 'weight', 'remarks', 'department', 'category', 'quality', 'product', 'type', 'store'])
-        }
-      })
-    },
     moment,
-    supplementData () {
-      this.supplementDate = !this.supplementDate
+    initHeaderFilter () {
+      const [departmentFilters, categoryFilters, qualityFilters, productFilters] = [[], [], [], []]
+      getInfoList().then(res => {
+        res.department.map((val) => { departmentFilters.push({ text: val, value: val }) })
+        res.category.map((val) => { categoryFilters.push({ text: val, value: val }) })
+        res.quality.map((val) => { qualityFilters.push({ text: val.name, value: val.name }) })
+        res.product.map((val) => { productFilters.push({ text: val, value: val }) })
+      }).then(() => {
+        this.columns = [
+          {
+            align: 'center',
+            title: 'ID',
+            dataIndex: 'id',
+            scopedSlots: { customRender: 'id' },
+            sorter: (a, b) => a.id - b.id
+          },
+          {
+            align: 'center',
+            title: '部门',
+            dataIndex: 'department',
+            scopedSlots: { customRender: 'department' },
+            filters: departmentFilters,
+            onFilter: (value, record) => record.department.indexOf(value) === 0
+          },
+          {
+            align: 'center',
+            title: '类别',
+            dataIndex: 'category',
+            scopedSlots: { customRender: 'category' },
+            filters: categoryFilters,
+            onFilter: (value, record) => record.category.indexOf(value) === 0
+          },
+          {
+            align: 'center',
+            title: '类型',
+            dataIndex: 'type',
+            customRender: (type) => type === 'send' ? <div>发货</div> : <div>收货</div>,
+            filters: [{
+              text: '发货',
+              value: 'send'
+            }, {
+              text: '收货',
+              value: 'receive'
+            }],
+            onFilter: (value, record) => record.type.indexOf(value) === 0
+          },
+          {
+            align: 'center',
+            title: '成色',
+            dataIndex: 'quality',
+            scopedSlots: { customRender: 'quality' },
+            filters: qualityFilters,
+            onFilter: (value, record) => record.quality.indexOf(value) === 0
+          },
+          {
+            align: 'center',
+            title: '产品',
+            dataIndex: 'product',
+            scopedSlots: { customRender: 'product' },
+            filters: productFilters,
+            onFilter: (value, record) => record.product.indexOf(value) === 0
+          },
+          {
+            align: 'center',
+            title: '重量(g)',
+            dataIndex: 'weight',
+            scopedSlots: { customRender: 'weight' },
+            sorter: (a, b) => a.weight - b.weight
+          },
+          {
+            width: 'auto',
+            align: 'center',
+            title: '件数',
+            dataIndex: 'number',
+            scopedSlots: { customRender: 'number' },
+            sorter: (a, b) => a.number - b.number
+          },
+          {
+            align: 'center',
+            title: '备注',
+            dataIndex: 'remarks',
+            scopedSlots: { customRender: 'remarks' }
+          },
+          {
+            width: '50px',
+            align: 'center',
+            title: '时间',
+            dataIndex: 'timestamp',
+            customRender: (time) => { return <div class="table-time">{moment(time).format('MM-DD HH:mm')}</div> },
+            sorter: (a, b) => moment(a.timestamp).unix() - moment(b.timestamp).unix()
+          },
+          {
+            width: '100px',
+            align: 'center',
+            title: '操作',
+            dataIndex: 'action',
+            scopedSlots: { customRender: 'action' }
+          }
+        ]
+      })
     },
-    setBalance (port) {
+    queryData () {
+      getDataList(this.queryParam).then(res => { this.data = res.data })
+    },
+    changeView (s) {
+      this.detailsId = s
+      this.details = true
+    },
+    refreshTable (s) {
+      getDataList(this.queryParam).then(res => { this.data = res.data })
+    },
+    setBalancePort (port) {
       this.balancePort = port
       window.localStorage.setItem('port', port)
     },
-    readWeight () {
-      this.form.setFieldsValue({
-        weight: '读取中...'
-      })
-      this.$http.get(`/collecter/weight/${this.balancePort}`).then(res => {
-        if (res.state === 'error') {
-          setTimeout(() => {
-            this.readWeight()
-          }, 1000)
-        } else {
-          this.form.setFieldsValue({
-            weight: res.weight
-          })
-        }
-      })
-    },
-    getData (parameter) {
-      return getDataList(Object.assign(parameter, this.queryParam))
-        .then(res => {
-          res.result.data.map((val) => {
-            val['editable'] = false
-          })
-          return res.result
-        })
-    },
-    clearSubmit () {
-      this.form.resetFields()
-      this.supplementDate = false
-      this.showRemarks = false
-    },
-    onChange (date, dateString) {
-      this.queryParam.date = {
-        start: dateString[0],
-        end: dateString[1]
-      }
-    },
-    showDrawer () {
-      this.visible = true
-    },
-    onClose () {
-      this.visible = false
-    },
-    handleSubmit (e) {
-      e.preventDefault()
-      this.form.validateFields((err, values) => {
-        if (!values.remarks) {
-          values.remarks = ''
-        }
-        if (!err) {
-          this.$http.post('/api/machining', values).then(res => {
-            if (res.status === 'success') {
-              this.$message.info('新增成功！')
-              this.visible = false
-              this.form.resetFields()
-              this.$refs.table.refresh()
-            }
-          })
-        }
-      })
-    },
-    handleChange (value, key, column, record) {
-      record[column.dataIndex] = value
-    },
     fill (row) {
       this.visible = true
-      setTimeout(() => {
-        if (row.remarks) {
-          this.showRemarks = true
-          setTimeout(() => {
-            this.form.setFieldsValue({
-              remarks: row.remarks
-            })
-          }, 0)
-        }
-        this.form.setFieldsValue({
-          id: row.id,
-          number: row.number,
-          weight: row.weight,
-          quality: row.quality,
-          product: row.product,
-          staff: row.staff,
-          department: row.department
-        })
-      }, 0)
-    },
-    edit (row) {
-      row.editable = true
+      this.fillData = row
     },
     del (row) {
       const $this = this
@@ -576,35 +208,26 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          // 在这里调用删除接口
           $this.$http.delete(`/api/machining?key=${row.key}`).then(res => {
             if (res.status === 'success') {
               $this.$message.info('删除成功！')
-              $this.$refs.table.refresh()
+              getDataList($this.queryParam).then(res => { $this.data = res.data })
             }
           })
-        },
-        onCancel () {
-          console.log('Cancel')
         }
       })
-    },
-    save (row) {
-      row.editable = false
-      this.$http.put('/api/machining', row).then(res => {
-        if (res.status === 'success') {
-          this.$message.info('修改成功！')
-        }
-      })
-    },
-    cancel (row) {
-      row.editable = false
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
+  .table-time {
+    font-size: 12px;
+  }
+  .ant-table th, td {
+    white-space: nowrap;
+  }
   .search {
     margin-bottom: 54px;
   }

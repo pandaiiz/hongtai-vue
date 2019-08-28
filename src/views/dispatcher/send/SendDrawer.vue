@@ -1,59 +1,329 @@
 <template>
   <span>
-    <a-button @click="showDrawer">
-      <a-icon type="down"/>统计
+    <a-button style="margin-left: 8px" type="primary" @click="showDrawer">
+      <a-icon type="plus" /> 新增
     </a-button>
     <a-drawer
-      title="订单统计"
-      placement="bottom"
+      title="新建收发"
+      :width="900"
       @close="onClose"
       :visible="visible"
-      height="auto"
-    >
-      <a-table :columns="columns" :dataSource="psMsg" :pagination="false" :rowKey="(record, key) => key">
-      </a-table>
-      {{ psMsg }}
+      :wrapStyle="{height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px'}">
+      <a-form :form="form" layout="vertical" hideRequiredMark @submit="handleSubmit">
+        <a-row :gutter="16">
+          <a-col :span="12">
+            <a-form-item label="传递单ID">
+              <a-input
+                @blur="scanning"
+                placeholder="请输入ID"
+                v-decorator="[
+                  'id', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入ID' }] }
+                ]"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="员工">
+              <a-input
+                @blur="loadStaff"
+                placeholder="请输入员工ID"
+                v-decorator="[
+                  'staff',
+                  {rules: [{ required: true, message: '请输入员工ID' }] }
+                ]"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="部门">
+              <a-select
+                v-decorator="[
+                  'department', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请选择部门' }]}
+                ]"
+                placeholder="请选择员工"
+              >
+                <a-select-option v-for="item in infoList.department" :key="item" :value="item">{{ item }}</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item label="件数">
+              <a-input
+                placeholder="请输入件数"
+                v-decorator="[
+                  'number', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请输入件数' }]}
+                ]"
+              />
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item label="重量">
+              <a-input
+                v-decorator="[
+                  'weight', // 给表单赋值或拉取表单时，该input对应的key
+                  {rules: [{ required: true, message: '请读取重量' }]}
+                ]"
+                placeholder="请读取重量"
+                size="default">
+                <a-icon slot="addonAfter" type="setting" @click="readWeight"/>
+              </a-input>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12">
+            <a-form-item label="类型">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'type',
+                  {rules: [{ required: true, message: '请选择发货类型' }]}
+                ]">
+                <a-radio-button value="send">发货</a-radio-button>
+                <a-radio-button value="receive">收货</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="16">
+          <a-col :span="24">
+            <a-form-item label="类别">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'category',
+                  {rules: [{ required: true, message: '请选择类别' }]}
+                ]">
+                <a-radio-button v-for="item in infoList.category" :key="item" :value="item">{{ item }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
+            <a-form-item label="成色">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'quality',
+                  {rules: [{ required: true, message: '请选择成色' }], initialValue: ''}
+                ]">
+                <a-radio-button v-for="item in infoList.quality" :key="item.name" :value="item.name">{{ item.name }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24">
+            <a-form-item label="产品">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'product',
+                  {rules: [{ required: true, message: '请选择产品' }]}
+                ]">
+                <a-radio-button v-for="item in infoList.product" :key="item" :value="item">{{ item }}</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+          <a-col :span="12" v-if="supplementDate">
+            <a-form-item label="补录日期">
+              <a-date-picker
+                v-decorator="[
+                  'supplementDate'
+                ]"/>
+            </a-form-item>
+          </a-col>
+          <a-col :span="24" v-if="showRemarks">
+            <a-form-item label="备注">
+              <a-textarea
+                v-decorator="[
+                  'remarks'
+                ]"
+                placeholder="请输入备注"
+                autosize
+              />
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <div
+          :style="{
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            width: '100%',
+            borderTop: '1px solid #e9e9e9',
+            padding: '10px 16px',
+            background: '#fff',
+            textAlign: 'right',
+          }"
+        >
+          <a-button
+            :style="{marginRight: '8px'}"
+            @click="showRemarksToggle">
+            备注
+          </a-button>
+          <a-button
+            :style="{marginRight: '8px'}"
+            @click="supplementData">
+            补录
+          </a-button>
+          <a-button :style="{marginRight: '8px'}" @click="clearSubmit" type="danger">
+            重置
+          </a-button>
+          <a-button :style="{marginRight: '8px'}" @click="onClose" type="default">
+            关闭
+          </a-button>
+          <a-button html-type="submit" type="primary">提交</a-button>
+        </div>
+      </a-form>
     </a-drawer>
   </span>
 </template>
 <script>
-const columns = [{
-  title: '半成品',
-  dataIndex: 'bcp_weight'
-}, {
-  title: '成品',
-  dataIndex: 'cp_weight'
-}, {
-  title: '废品',
-  dataIndex: 'fp_weight'
-}, {
-  title: '退货',
-  key: 'th_weight'
-}, {
-  title: '损耗',
-  key: 'lost_weight'
-}]
+import { getInfoList } from '@/api/manage'
 export default {
   name: 'SendDrawer',
   data () {
     return {
-      data: [],
-      columns,
-      visible: false
+      showRemarks: false,
+      form: this.$form.createForm(this),
+      infoList: {},
+      supplementDate: false
     }
   },
+  mounted () {
+    this.form = this.$form.createForm(this)
+  },
+  created () {
+    getInfoList()
+      .then(res => {
+        this.infoList = res
+      })
+  },
   props: {
-    'psMsg': {
-      default: () => [],
-      type: [Array]
+    'visible': {
+      default: false,
+      type: [Boolean]
+    },
+    'fillData': {
+      default: () => {},
+      type: [Object]
+    },
+    'balancePort': {
+      default: '',
+      type: [String]
+    }
+  },
+  watch: {
+    visible (open) {
+      if (open) {
+        if (this.fillData.remarks) {
+          this.showRemarks = true
+          setTimeout(() => {
+            this.form.setFieldsValue({
+              remarks: this.fillData.remarks
+            })
+          }, 0)
+        }
+        setTimeout(() => {
+          this.form.setFieldsValue({
+            id: this.fillData.id,
+            number: this.fillData.number,
+            weight: this.fillData.weight,
+            quality: this.fillData.quality,
+            product: this.fillData.product,
+            staff: this.fillData.staff,
+            department: this.fillData.department
+          })
+        }, 0)
+      }
     }
   },
   methods: {
+    showRemarksToggle () {
+      this.showRemarks = !this.showRemarks
+    },
+    supplementData () {
+      this.supplementDate = !this.supplementDate
+    },
+    readWeight () {
+      this.form.setFieldsValue({
+        weight: '读取中...'
+      })
+      this.$http.get(`/collecter/weight/${this.balancePort}`).then(res => {
+        if (res.state === 'error') {
+          setTimeout(() => {
+            this.readWeight()
+          }, 1000)
+        } else {
+          this.form.setFieldsValue({
+            weight: res.weight
+          })
+        }
+      })
+    },
     showDrawer () {
-      this.visible = true
+      this.$emit('update:visible', true)
+      this.$emit('update:fillData', {})
+      this.showRemarks = false
+      this.supplementDate = false
+    },
+    clearSubmit () {
+      this.form.resetFields()
+      this.supplementDate = false
+      this.showRemarks = false
+    },
+    scanning (e) {
+      this.$http.get(`/api/scanning?id=${e.target.value}`).then(res => {
+        if (res.data.length > 0) {
+          if (res.data[0].remarks) {
+            this.showRemarks = true
+            setTimeout(() => {
+              this.form.setFieldsValue({
+                remarks: res.data[0].remarks
+              })
+            }, 0)
+          }
+          this.form.setFieldsValue({
+            number: res.data[0].number,
+            weight: res.data[0].weight,
+            quality: res.data[0].quality,
+            product: res.data[0].product
+          })
+        } else {
+          this.form.resetFields(['number', 'weight', 'remarks', 'department', 'category', 'quality', 'product', 'type', 'store'])
+        }
+      })
     },
     onClose () {
-      this.visible = false
+      this.$emit('update:visible', false)
+    },
+    handleSubmit (e) {
+      e.preventDefault()
+      this.form.validateFields((err, values) => {
+        if (!values.remarks) {
+          values.remarks = ''
+        }
+        if (!err) {
+          this.$http.post('/api/machining', values).then(res => {
+            if (res.status === 'success') {
+              this.$message.info('新增成功！')
+              this.$emit('update:visible', false)
+              this.$emit('refresh')
+              this.form.resetFields()
+            }
+          })
+        }
+      })
+    },
+    loadStaff (e) {
+      if (!e.target.value) {
+        return
+      }
+      this.$http.get(`/api/staff?code=${e.target.value}`).then(res => {
+        this.form.setFieldsValue({
+          department: res.data[0].department,
+          staff: res.data[0].name
+        })
+      })
     }
   }
 }
