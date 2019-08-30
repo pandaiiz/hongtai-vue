@@ -80,8 +80,14 @@ export const asyncRouterMap = [
           {
             path: '/inventory/main',
             name: 'InventoryMain',
-            component: () => import('@/views/inventory/main/BillsList'),
+            component: () => import('@/views/inventory/main/Main'),
             meta: { title: '盘点详情', permission: [ 'profile' ] }
+          },
+          {
+            path: '/inventory/store',
+            name: 'InventoryStore',
+            component: () => import('@/views/inventory/store/InventoryStore'),
+            meta: { title: '总仓', permission: [ 'profile' ] }
           }
           // {
           //   path: '/bills/order',

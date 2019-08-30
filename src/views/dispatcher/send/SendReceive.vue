@@ -1,6 +1,7 @@
 <template>
   <div>
     <a-card :bordered="false">
+      <!-- <a-button @click="clearFilters"></a-button> -->
       <a-row :span="24">
         <a-col :span="24">
           <a-range-picker
@@ -17,19 +18,40 @@
       </a-row>
       <br />
       <a-table
+        :rowClassName="setClassName"
+        @change="dataFilter"
         size="middle"
         :scroll="{ x: true }"
         :columns="columns"
         :pagination="false"
         :dataSource="data">
         <template slot="id" slot-scope="text">
-          <!-- <router-link :to="{ name:'SendTimeline', query: { id: text } }"> -->
-          <!-- {{ text }} -->
-          <!-- </router-link> -->
           <a @click="changeView(text)">
             {{ text }}
           </a>
         </template>
+        <template slot="filterDropdown" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters }" class="custom-filter-dropdown">
+          <a-input
+            v-ant-ref="c => searchInput = c"
+            :placeholder="`请输入要查询的值`"
+            :value="selectedKeys[0]"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+          />
+          <a-button
+            type="primary"
+            @click="() => handleSearch(selectedKeys, confirm)"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+          >查询</a-button>
+          <a-button
+            @click="() => handleReset(clearFilters)"
+            size="small"
+            style="width: 90px"
+          >重置</a-button>
+        </template>
+        <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
         <template slot="action" slot-scope="text, record">
           <div class="editable-row-operations">
             <span>
@@ -67,7 +89,6 @@ export default {
         date: [moment(), moment()]
       },
       balancePort: '',
-      // 表头
       columns: [],
       data: []
     }
@@ -80,6 +101,20 @@ export default {
   },
   methods: {
     moment,
+    setClassName (record, index) {
+      let className
+      if (record.state === 'delete') className = 'delete-row'
+      return className
+    },
+    handleSearch (selectedKeys, confirm) {
+      confirm()
+    },
+    handleReset (clearFilters) {
+      clearFilters()
+    },
+    dataFilter (pagination, filters, sorter) {
+      getDataList(Object.assign(this.queryParam, { filters })).then(res => { this.data = res.data })
+    },
     initHeaderFilter () {
       const [departmentFilters, categoryFilters, qualityFilters, productFilters] = [[], [], [], []]
       getInfoList().then(res => {
@@ -101,16 +136,14 @@ export default {
             title: '部门',
             dataIndex: 'department',
             scopedSlots: { customRender: 'department' },
-            filters: departmentFilters,
-            onFilter: (value, record) => record.department.indexOf(value) === 0
+            filters: departmentFilters
           },
           {
             align: 'center',
             title: '类别',
             dataIndex: 'category',
             scopedSlots: { customRender: 'category' },
-            filters: categoryFilters,
-            onFilter: (value, record) => record.category.indexOf(value) === 0
+            filters: categoryFilters
           },
           {
             align: 'center',
@@ -123,45 +156,40 @@ export default {
             }, {
               text: '收货',
               value: 'receive'
-            }],
-            onFilter: (value, record) => record.type.indexOf(value) === 0
+            }]
           },
           {
             align: 'center',
             title: '成色',
             dataIndex: 'quality',
             scopedSlots: { customRender: 'quality' },
-            filters: qualityFilters,
-            onFilter: (value, record) => record.quality.indexOf(value) === 0
+            filters: qualityFilters
           },
           {
             align: 'center',
             title: '产品',
             dataIndex: 'product',
             scopedSlots: { customRender: 'product' },
-            filters: productFilters,
-            onFilter: (value, record) => record.product.indexOf(value) === 0
+            filters: productFilters
           },
           {
             align: 'center',
             title: '重量(g)',
             dataIndex: 'weight',
-            scopedSlots: { customRender: 'weight' },
-            sorter: (a, b) => a.weight - b.weight
+            scopedSlots: { customRender: 'weight' }
           },
           {
             width: 'auto',
             align: 'center',
             title: '件数',
             dataIndex: 'number',
-            scopedSlots: { customRender: 'number' },
-            sorter: (a, b) => a.number - b.number
+            scopedSlots: { customRender: 'number' }
           },
           {
             align: 'center',
             title: '备注',
             dataIndex: 'remarks',
-            scopedSlots: { customRender: 'remarks' }
+            scopedSlots: { customRender: 'remarks', filterDropdown: 'filterDropdown', filterIcon: 'filterIcon' }
           },
           {
             width: '50px',
@@ -221,7 +249,15 @@ export default {
 }
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
+  .delete-row {
+    background-color: #e0e0e0;
+    text-decoration: line-through;
+    cursor: not-allowed;
+  }
+  .delete-row > td > a {
+    cursor: not-allowed;
+  }
   .table-time {
     font-size: 12px;
   }
