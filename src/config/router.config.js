@@ -45,28 +45,29 @@ export const asyncRouterMap = [
             name: 'ReportDay',
             component: () => import('@/views/dispatcher/report/ReportDay'),
             meta: { title: '部门统计', permission: [ 'profile' ] }
-          }, {
-            path: '/dispatcher/warehouse',
-            name: 'Warehouse',
-            component: () => import('@/views/dispatcher/warehouse/WareHouseLayout'),
-            meta: { title: '仓库统计', permission: [ 'profile' ] },
-            redirect: '/dispatcher/warehouse/statistic',
-            hideChildrenInMenu: true,
-            children: [
-              {
-                path: '/dispatcher/warehouse/statistic',
-                name: 'ReportWarehouse',
-                component: () => import('@/views/dispatcher/warehouse/WareHouse'),
-                meta: { title: '仓库统计', permission: [ 'profile' ] }
-              },
-              {
-                path: '/dispatcher/warehouse/warehouse-details',
-                name: 'WareHouseDetails',
-                component: () => import('@/views/dispatcher/warehouse/WareHouseDetails'),
-                meta: { title: '仓库详情', permission: [ 'profile' ] }
-              }
-            ]
           }
+          // , {
+          //   path: '/dispatcher/warehouse',
+          //   name: 'Warehouse',
+          //   component: () => import('@/views/dispatcher/warehouse/WareHouseLayout'),
+          //   meta: { title: '仓库统计', permission: [ 'profile' ] },
+          //   redirect: '/dispatcher/warehouse/statistic',
+          //   hideChildrenInMenu: true,
+          //   children: [
+          //     {
+          //       path: '/dispatcher/warehouse/statistic',
+          //       name: 'ReportWarehouse',
+          //       component: () => import('@/views/dispatcher/warehouse/WareHouse'),
+          //       meta: { title: '仓库统计', permission: [ 'profile' ] }
+          //     },
+          //     {
+          //       path: '/dispatcher/warehouse/warehouse-details',
+          //       name: 'WareHouseDetails',
+          //       component: () => import('@/views/dispatcher/warehouse/WareHouseDetails'),
+          //       meta: { title: '仓库详情', permission: [ 'profile' ] }
+          //     }
+          //   ]
+          // }
         ]
       },
       // in and out 单据
@@ -81,13 +82,19 @@ export const asyncRouterMap = [
             path: '/inventory/main',
             name: 'InventoryMain',
             component: () => import('@/views/inventory/main/Main'),
-            meta: { title: '盘点详情', permission: [ 'profile' ] }
+            meta: { title: '传递单入库', permission: [ 'profile' ], keepAlive: false }
           },
           {
             path: '/inventory/store',
             name: 'InventoryStore',
             component: () => import('@/views/inventory/store/InventoryStore'),
-            meta: { title: '总仓', permission: [ 'profile' ] }
+            meta: { title: '总仓详情', permission: [ 'profile' ] }
+          },
+          {
+            path: '/inventory/details',
+            name: 'InventoryDetails',
+            component: () => import('@/views/inventory/details/InventoryDetails'),
+            meta: { title: '盘点', permission: [ 'profile' ] }
           }
           // {
           //   path: '/bills/order',

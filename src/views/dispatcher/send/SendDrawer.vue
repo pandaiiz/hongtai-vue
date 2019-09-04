@@ -304,6 +304,7 @@ export default {
         }
         if (!err) {
           this.$http.post('/api/machining', values).then(res => {
+            console.log(res)
             if (res.status === 'success') {
               this.$message.info('新增成功！')
               this.$emit('update:visible', false)
