@@ -254,7 +254,6 @@ export default {
             })
           } else {
             this.$http.get(`/api/company?code=${values.code}`).then(res => {
-              console.log(res)
               if (res.data.length > 0) {
                 this.$message.info('客户编码已存在，请修改！')
                 return false

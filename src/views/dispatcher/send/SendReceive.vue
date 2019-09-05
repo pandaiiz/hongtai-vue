@@ -52,6 +52,28 @@
           >重置</a-button>
         </template>
         <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
+        <template slot="filterId" slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters }" class="custom-filter-dropdown">
+          <a-input
+            v-ant-ref="c => searchInput = c"
+            :placeholder="`请输入要查询的值`"
+            :value="selectedKeys[0]"
+            @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+            style="width: 188px; margin-bottom: 8px; display: block;"
+          />
+          <a-button
+            type="primary"
+            @click="() => handleSearch(selectedKeys, confirm)"
+            icon="search"
+            size="small"
+            style="width: 90px; margin-right: 8px"
+          >查询</a-button>
+          <a-button
+            @click="() => handleReset(clearFilters)"
+            size="small"
+            style="width: 90px"
+          >重置</a-button>
+        </template>
+        <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
         <template slot="action" slot-scope="text, record">
           <div class="editable-row-operations">
             <span>
@@ -107,6 +129,7 @@ export default {
       return className
     },
     handleSearch (selectedKeys, confirm) {
+      console.log(selectedKeys)
       confirm()
     },
     handleReset (clearFilters) {
@@ -128,8 +151,8 @@ export default {
             align: 'center',
             title: 'ID',
             dataIndex: 'id',
-            scopedSlots: { customRender: 'id' },
-            sorter: (a, b) => a.id - b.id
+            scopedSlots: { customRender: 'id', filterDropdown: 'filterId', filterIcon: 'filterIcon' }
+            // sorter: (a, b) => a.id - b.id
           },
           {
             align: 'center',

@@ -49,7 +49,6 @@ export function getStoreData (parameter) {
 }
 
 export function postData (parameter) {
-  console.log(parameter)
   return axios({
     url: api.data,
     method: 'post',

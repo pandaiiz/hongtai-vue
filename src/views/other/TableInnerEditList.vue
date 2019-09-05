@@ -185,9 +185,7 @@ export default {
     }
   },
   methods: {
-
     handleChange (value, key, column, record) {
-      console.log(value, key, column)
       record[column.dataIndex] = value
     },
     edit (row) {

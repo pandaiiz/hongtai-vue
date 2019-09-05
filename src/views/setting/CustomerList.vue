@@ -41,6 +41,7 @@ export default {
   },
   methods: {
     deleteOption (code) {
+      const $this = this
       this.$confirm({
         title: '警告',
         content: `确认要删除此条信息吗?`,
@@ -48,11 +49,11 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          this.$http.delete(`/api/company?code=${code}`).then(res => {
+          $this.$http.delete(`/api/company?code=${code}`).then(res => {
             if (res.status === 'success') {
-              const companyKey = this.companyList.findIndex((item, key) => item.code === code)
-              this.companyList.splice(companyKey, 1)
-              this.$message.info('删除成功！')
+              const companyKey = $this.companyList.findIndex((item, key) => item.code === code)
+              $this.companyList.splice(companyKey, 1)
+              $this.$message.info('删除成功！')
             }
           })
         }

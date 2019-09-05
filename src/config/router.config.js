@@ -76,7 +76,7 @@ export const asyncRouterMap = [
         name: 'Inventory',
         component: RouteView,
         redirect: '/inventory/main',
-        meta: { title: '盘点', icon: 'profile', permission: [ 'profile' ] },
+        meta: { title: '盘点', icon: 'book', permission: [ 'profile' ] },
         children: [
           {
             path: '/inventory/main',

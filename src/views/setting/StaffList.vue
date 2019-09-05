@@ -5,6 +5,10 @@
         <router-link :to="{ name:'Staff', query: { code: record.code } }">
           详情
         </router-link>
+        <a-divider type="vertical"/>
+        <a-popconfirm title="确认要删除此员工吗？" @confirm="deleteStaff(record)" okText="是" cancelText="否">
+          <a>删除</a>
+        </a-popconfirm>
       </template>
     </a-table>
   </a-card>
@@ -22,6 +26,9 @@ export default {
     this.init()
   },
   methods: {
+    deleteStaff (row) {
+      this.$http.delete(`/api/staff?code=${row.code}`).then(res => this.init())
+    },
     departmentFilter (arr) {
       const departmentArray = []
       arr.map((val) => {
@@ -41,21 +48,25 @@ export default {
         this.columns = [{
           title: 'ID',
           dataIndex: 'code',
-          sorter: (a, b) => +a.code - +b.code
+          sorter: (a, b) => +a.code - +b.code,
+          align: 'center'
         }, {
           title: '姓名',
-          dataIndex: 'name'
+          dataIndex: 'name',
+          align: 'center'
         }, {
           title: '部门',
           dataIndex: 'department',
           filters: filter,
           onFilter: (value, record) => record.department.indexOf(value) === 0,
-          sorter: (a, b) => a.department.length - b.department.length
+          sorter: (a, b) => a.department.length - b.department.length,
+          align: 'center'
         }, {
           title: '操作',
           key: 'action',
           dataIndex: 'action',
-          scopedSlots: { customRender: 'action' }
+          scopedSlots: { customRender: 'action' },
+          align: 'center'
         }]
       })
     }
