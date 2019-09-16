@@ -14,7 +14,7 @@
           <a-col :span="12">
             <a-form-item label="传递单ID">
               <a-input
-                @blur="scanning"
+                @blur="scan"
                 placeholder="请输入ID"
                 v-decorator="[
                   'id', // 给表单赋值或拉取表单时，该input对应的key
@@ -42,7 +42,7 @@
                   'department', // 给表单赋值或拉取表单时，该input对应的key
                   {rules: [{ required: true, message: '请选择部门' }]}
                 ]"
-                placeholder="请选择员工"
+                placeholder="请选择部门"
               >
                 <a-select-option v-for="item in infoList.department" :key="item" :value="item">{{ item }}</a-select-option>
               </a-select>
@@ -73,15 +73,15 @@
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="类型">
+            <a-form-item label="出库/入库">
               <a-radio-group
                 buttonStyle="solid"
                 v-decorator="[
                   'type',
                   {rules: [{ required: true, message: '请选择发货类型' }]}
                 ]">
-                <a-radio-button value="send">发货</a-radio-button>
-                <a-radio-button value="receive">收货</a-radio-button>
+                <a-radio-button value="1">发货</a-radio-button>
+                <a-radio-button value="2">收货</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
@@ -123,11 +123,11 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
-          <a-col :span="12" v-if="supplementDate">
+          <a-col :span="12" v-if="supplement">
             <a-form-item label="补录日期">
               <a-date-picker
                 v-decorator="[
-                  'supplementDate'
+                  'supplement'
                 ]"/>
             </a-form-item>
           </a-col>
@@ -162,7 +162,7 @@
           </a-button>
           <a-button
             :style="{marginRight: '8px'}"
-            @click="supplementData">
+            @click="supplementDate">
             补录
           </a-button>
           <a-button :style="{marginRight: '8px'}" @click="clearSubmit" type="danger">
@@ -179,6 +179,8 @@
 </template>
 <script>
 import { getInfoList } from '@/api/manage'
+import { saveMachining, scanMachining } from '@/api/send'
+import { getStaff } from '@/api/staff'
 export default {
   name: 'SendDrawer',
   data () {
@@ -186,7 +188,7 @@ export default {
       showRemarks: false,
       form: this.$form.createForm(this),
       infoList: {},
-      supplementDate: false
+      supplement: false
     }
   },
   mounted () {
@@ -241,8 +243,8 @@ export default {
     showRemarksToggle () {
       this.showRemarks = !this.showRemarks
     },
-    supplementData () {
-      this.supplementDate = !this.supplementDate
+    supplementDate () {
+      this.supplement = !this.supplement
     },
     readWeight () {
       this.form.setFieldsValue({
@@ -264,29 +266,29 @@ export default {
       this.$emit('update:visible', true)
       this.$emit('update:fillData', {})
       this.showRemarks = false
-      this.supplementDate = false
+      this.supplement = false
     },
     clearSubmit () {
       this.form.resetFields()
-      this.supplementDate = false
+      this.supplement = false
       this.showRemarks = false
     },
-    scanning (e) {
-      this.$http.get(`/api/scanning?id=${e.target.value}`).then(res => {
-        if (res.data.length > 0) {
-          if (res.data[0].remarks) {
+    scan (e) {
+      scanMachining({ id: e.target.value }).then(res => {
+        if (res.result.length > 0) {
+          if (res.result[0].remarks) {
             this.showRemarks = true
             setTimeout(() => {
               this.form.setFieldsValue({
-                remarks: res.data[0].remarks
+                remarks: res.result[0].remarks
               })
             }, 0)
           }
           this.form.setFieldsValue({
-            number: res.data[0].number,
-            weight: res.data[0].weight,
-            quality: res.data[0].quality,
-            product: res.data[0].product
+            number: res.result[0].number,
+            weight: res.result[0].weight,
+            quality: res.result[0].quality,
+            product: res.result[0].product
           })
         } else {
           this.form.resetFields(['number', 'weight', 'remarks', 'department', 'category', 'quality', 'product', 'type', 'store'])
@@ -299,13 +301,9 @@ export default {
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
-        if (!values.remarks) {
-          values.remarks = ''
-        }
         if (!err) {
-          this.$http.post('/api/machining', values).then(res => {
-            console.log(res)
-            if (res.status === 'success') {
+          saveMachining(values).then(res => {
+            if (res.state === 'success') {
               this.$message.info('新增成功！')
               this.$emit('update:visible', false)
               this.$emit('refresh')
@@ -319,10 +317,10 @@ export default {
       if (!e.target.value) {
         return
       }
-      this.$http.get(`/api/staff?code=${e.target.value}`).then(res => {
+      getStaff({ code: e.target.value }).then(res => {
         this.form.setFieldsValue({
-          department: res.data[0].department,
-          staff: res.data[0].name
+          department: res.result[0].department,
+          staff: res.result[0].name
         })
       })
     }

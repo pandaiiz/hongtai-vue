@@ -1,17 +1,16 @@
 <template>
   <div>
-    <!-- table -->
     <a-card>
       <router-link :to="{ name: 'BillsOrderList' }">
         <a-button>返回</a-button>
       </router-link>
       <a-form :form="form">
         <a-row :gutter="8">
-          <a-col :span="6">
+          <a-col :xs="8">
             <a-form-item label="单据类型" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
               <a-select
                 v-decorator="[
-                  'orderType', // 给表单赋值或拉取表单时，该input对应的key
+                  'orderType',
                   {rules: [{ required: true, message: '请选择单据类型' }]}
                 ]"
                 :options="options"
@@ -19,7 +18,7 @@
               />
             </a-form-item>
           </a-col>
-          <a-col :span="6">
+          <a-col :xs="8">
             <a-form-item :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }" label="日期">
               <a-date-picker
                 style="width: 100%"
@@ -31,30 +30,28 @@
               />
             </a-form-item>
           </a-col>
-          <a-col :span="6">
+          <a-col :xs="8">
             <a-form-item label="公司编码" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
               <a-input
                 @blur="findCompanyName($event)"
                 placeholder="请输入公司编码"
                 v-decorator="[
-                  'companyCode', // 给表单赋值或拉取表单时，该input对应的key
+                  'companyCode',
                   {rules: [{ required: true, message: '请输入公司编码' }]}
                 ]"
               />
             </a-form-item>
           </a-col>
-          <a-col :span="12">
-            <a-form-item label="公司名称" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+        </a-row>
+        <a-row :gutter="8">
+          <a-col :xs="8">
+            <a-form-item label="公司名称" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
               <a-select
                 v-decorator="[
-                  'companyName', // 给表单赋值或拉取表单时，该input对应的key
+                  'companyName',
                   {rules: [{ required: true, message: '请输入公司名称' }]}
                 ]"
-                showSearch
                 placeholder="请输入公司名称"
-                optionFilterProp="children"
-                @change="companyNameChange"
-                :filterOption="filterOption"
               >
                 <a-select-option
                   v-for="item in companys"
@@ -64,48 +61,40 @@
               </a-select>
             </a-form-item>
           </a-col>
-          <a-col :span="12">
-            <a-form-item label="总价" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+          <a-col :xs="8">
+            <a-form-item label="出入库" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
+              <a-radio-group
+                buttonStyle="solid"
+                v-decorator="[
+                  'type',
+                  {rules: [{ required: true, message: '请输入ID' }]}
+                ]"
+              >
+                <a-radio-button value="入库">入库</a-radio-button>
+                <a-radio-button value="出库">出库</a-radio-button>
+              </a-radio-group>
+            </a-form-item>
+          </a-col>
+        </a-row>
+        <a-row :gutter="8">
+          <a-col :xs="8">
+            <a-form-item label="总价" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
               <a-input
                 :disabled="true"
                 v-decorator="[
-                  'totalPay', // 给表单赋值或拉取表单时，该input对应的key
+                  'totalPay',
                 ]"
               />
             </a-form-item>
           </a-col>
-          <a-col :span="12">
-            <a-form-item label="总重量(g)" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
+          <a-col :xs="8">
+            <a-form-item label="总重量(g)" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
               <a-input
                 :disabled="true"
                 v-decorator="[
                   'totalWeight',
                 ]"
               />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="折足(g)" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-              <a-input
-                :disabled="true"
-                v-decorator="[
-                  'convertWeight',
-                ]"
-              />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="出入库" :label-col="{ span: 4 }" :wrapper-col="{ span: 20 }">
-              <a-radio-group
-                buttonStyle="solid"
-                v-decorator="[
-                  'type', // 给表单赋值或拉取表单时，该input对应的key
-                  {rules: [{ required: true, message: '请输入ID' }]}
-                ]"
-              >
-                <a-radio-button value="in">入库</a-radio-button>
-                <a-radio-button value="out">出库</a-radio-button>
-              </a-radio-group>
             </a-form-item>
           </a-col>
         </a-row>
@@ -115,34 +104,25 @@
         :columns="columns"
         :dataSource="data"
         :pagination="false"
-        :loading="memberLoading"
-      >
+        :loading="loading">
         <template
-          v-for="(col, i) in ['orderId', 'productName', 'quality', 'number', 'weight', 'unitPrice', 'pay', 'remarks']"
+          v-for="(col, i) in ['orderId', 'productName', 'weight', 'unitPrice', 'pay', 'remarks']"
           :slot="col"
-          slot-scope="text, record"
-        >
+          slot-scope="text, record">
           <a-select
             :key="col"
             style="width: 100px"
             v-if="record.editable && col == 'productName'"
             :value="text"
-            @change="e => handleChange(e, record.key, col)"
-          >
-            <a-select-option
-              v-for="(product, index) in priceList"
-              @click="setQuality(record.key, product.quality, product.unitPrice)"
-              :key="index"
-              :value="`${product.quality + product.name}`"
-            >{{ product.quality + product.name }}</a-select-option>
+            @change="e => handleChange(e, record.key, col)">
+            <a-select-option value="板料">板料</a-select-option>
           </a-select>
           <a-input
             :key="col"
             v-else-if="record.editable && col !== 'productName'"
             style="margin: -5px 0"
             :value="text"
-            @change="e => handleChange(e.target.value, record.key, col)"
-          />
+            @change="e => handleChange(e.target.value, record.key, col)"/>
           <template v-else>{{ text }}</template>
         </template>
         <template slot="operation" slot-scope="text, record">
@@ -180,6 +160,7 @@
 </template>
 
 <script>
+import { getCompanyList } from '@/api/manage'
 import moment from 'moment'
 import xlsxUtils from '@/utils/xlsx.utils'
 import saveAs from 'file-saver'
@@ -199,20 +180,6 @@ const columns = [
     scopedSlots: { customRender: 'productName' }
   },
   {
-    title: '成色',
-    dataIndex: 'quality',
-    key: 'quality',
-    align: 'center',
-    scopedSlots: { customRender: 'quality' }
-  },
-  {
-    title: '数量(件)',
-    dataIndex: 'number',
-    key: 'number',
-    align: 'center',
-    scopedSlots: { customRender: 'number' }
-  },
-  {
     title: '重量(g)',
     dataIndex: 'weight',
     key: 'weight',
@@ -227,7 +194,7 @@ const columns = [
     scopedSlots: { customRender: 'unitPrice' }
   },
   {
-    title: '合计工费',
+    title: '合计',
     dataIndex: 'pay',
     key: 'pay',
     align: 'center',
@@ -256,10 +223,8 @@ export default {
       columns,
       options: [],
       orderType: [],
-      customType: '',
-      qualityOption: {},
       dateFormat: 'YYYY/MM/DD',
-      memberLoading: false,
+      loading: false,
       data: []
     }
   },
@@ -267,17 +232,13 @@ export default {
     this.form = this.$form.createForm(this)
   },
   created () {
+    getCompanyList().then(res => { if (res.status === 'success') { this.companys = res.result } })
     this.$http.get('/api/list').then(res => {
-      this.qualityOption = res.quality
       const gg = []
       res.order.map(val => {
         gg.push({ value: val, label: val })
       })
       this.options = [
-        {
-          value: 'product',
-          label: '成品出入'
-        },
         {
           value: 'material',
           label: '物料出入'
@@ -295,7 +256,6 @@ export default {
           companyName: res.data[0].custom_name,
           companyCode: res.data[0].custom_code,
           orderType: [res.data[0].custom_type, res.data[0].order_type],
-          convertWeight: res.data[0].convert_weight,
           type: res.data[0].type
         })
       })
@@ -313,14 +273,13 @@ export default {
         Data.push({
           customer: this.form.getFieldValue('companyName'),
           type: val.productName,
-          quality: val.quality,
           weight: val.weight,
           unitPrice: val.unitPrice,
           pay: val.pay,
           remarks: val.remarks
         })
       })
-      const keyMap = ['customer', 'type', 'quality', 'weight', 'unitPrice', 'pay', 'remarks']
+      const keyMap = ['customer', 'type', 'weight', 'unitPrice', 'pay', 'remarks']
       var head = {
         'A1': { 'v': '鸿泰黄金珠宝有限公司' },
         'C2': { 'v': `${this.form.getFieldValue('orderType')[1]}` },
@@ -337,7 +296,6 @@ export default {
         'F5': { 'v': '工费' },
         'G5': { 'v': '备注' },
         'C15': { 'v': '折足' },
-        'D15': { 'v': `${this.form.getFieldValue('convertWeight')}g` },
         'C16': { 'v': '合计' },
         'D16': { 'v': `${this.form.getFieldValue('totalWeight')}g` },
         'A17': { 'v': '交货人：' },
@@ -364,28 +322,6 @@ export default {
       var wb = xlsxUtils.format2WB(data, undefined, undefined, 'A1:G17')
       saveAs(xlsxUtils.format2Blob(wb), '这里是下载的文件名.xlsx')
     },
-    setQuality (index, value, price) {
-      this.data[+index - 1].quality = value
-      this.data[+index - 1].unitPrice = price
-    },
-    companyNameChange (value) {
-      const company = this.companys.find(item => item.name === value)
-      this.priceList = JSON.parse(company.price_list)
-      this.form.setFieldsValue({
-        companyCode: company.code
-      })
-    },
-    filterOption (input, option) {
-      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
-    },
-    // orderTypeOnChange (value) {
-    //   this.$http.get(`/api/company?companyType=${value[0]}&orderType=${value[1]}`).then(res => {
-    //     if (res.status === 'success') {
-    //       this.companys = res.data
-    //       this.form.resetFields(['companyName', 'companyCode'])
-    //     }
-    //   })
-    // },
     findCompanyName (e) {
       if (!e.target.value) {
         return
@@ -416,11 +352,10 @@ export default {
             dataList.push(value)
           })
           values.info = JSON.stringify(dataList)
-          this.$http.post('/api/order', values).then(res => {
+          this.$http.post('/api/warehouse/material', values).then(res => {
             if (res.status === 'success') {
               this.$message.info('新增成功！')
-              console.log(res)
-              this.idNo = res.id + 1000000
+              this.idNo = res.id + 2000000
             }
           })
         }
@@ -428,6 +363,7 @@ export default {
     },
     reset () {
       this.form.resetFields()
+      this.data = []
     },
     newMember () {
       // if (this.priceList.length === 0) {
@@ -442,7 +378,6 @@ export default {
       this.data.push({
         key: length === 0 ? '1' : (parseInt(this.data[length - 1].key) + 1).toString(),
         orderId: '',
-        quality: '',
         productName: '',
         name: '',
         workId: '',
@@ -457,48 +392,36 @@ export default {
       this.data = newData
     },
     saveRow (record) {
-      let convertWeight = 0
       let totalPay = 0
       let totalWeight = 0
       this.data.map(value => {
-        convertWeight += parseFloat(value.convert)
         totalPay += parseFloat(value.pay)
         totalWeight += parseFloat(value.weight)
       })
       this.form.setFieldsValue({
-        convertWeight: convertWeight.toFixed(2),
         totalPay: totalPay.toFixed(2),
         totalWeight: totalWeight.toFixed(2)
       })
-      this.memberLoading = true
-      const { key, productName, quality, weight } = record
+      this.loading = true
+      const { key, productName, weight } = record
       if (!productName) {
-        this.memberLoading = false
+        this.loading = false
         this.$message.warning('请填写产品名称！')
         return
       }
-      if (!quality) {
-        this.memberLoading = false
-        this.$message.warning('请填写成色！')
-        return
-      }
       if (!weight) {
-        this.memberLoading = false
+        this.loading = false
         this.$message.warning('请填写重量！')
         return
       }
       const target = this.data.filter(item => item.key === key)[0]
       target.editable = false
       target.isNew = false
-      this.memberLoading = false
+      this.loading = false
     },
     toggle (key) {
       const target = this.data.filter(item => item.key === key)[0]
       target.editable = !target.editable
-    },
-    getRowByKey (key, newData) {
-      const data = this.data
-      return (newData || data).filter(item => item.key === key)[0]
     },
     cancel (key) {
       const target = this.data.filter(item => item.key === key)[0]
@@ -508,19 +431,12 @@ export default {
       const newData = [...this.data]
       const target = newData.filter(item => key === item.key)[0]
       if (column === 'weight') {
-        if (!target.quality) {
-          this.$message.error('请先选择货品！')
-          return
-        }
-        const percent = +this.qualityOption.find((a) => { return a.name === target.quality }).percent / 100
         if (target.unitPrice) {
           const payNum = parseFloat(value) * parseFloat(target.unitPrice)
           if (!isNaN(payNum)) {
             target['pay'] = payNum.toFixed(2)
-            target['convert'] = value * percent
           } else {
             target['pay'] = 0.0
-            target['convert'] = 0.0
           }
         }
       }

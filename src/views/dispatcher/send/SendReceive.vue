@@ -91,6 +91,7 @@
 
 <script>
 import { getDataList, getInfoList } from '@/api/manage'
+import { deleteMachining } from '@/api/send'
 import moment from 'moment'
 import SendDrawer from './SendDrawer'
 import SendTimeLine from './SendTimeline'
@@ -118,14 +119,14 @@ export default {
   created () {
     const port = window.localStorage.getItem('port')
     this.balancePort = port
-    getDataList(this.queryParam).then(res => { this.data = res.data })
+    getDataList(this.queryParam).then(res => { this.data = res.result })
     this.initHeaderFilter()
   },
   methods: {
     moment,
     setClassName (record, index) {
       let className
-      if (record.state === 'delete') className = 'delete-row'
+      if (record.state === 0) className = 'delete-row'
       return className
     },
     handleSearch (selectedKeys, confirm) {
@@ -136,7 +137,7 @@ export default {
       clearFilters()
     },
     dataFilter (pagination, filters, sorter) {
-      getDataList(Object.assign(this.queryParam, { filters })).then(res => { this.data = res.data })
+      getDataList(Object.assign(this.queryParam, { filters })).then(res => { this.data = res.result })
     },
     initHeaderFilter () {
       const [departmentFilters, categoryFilters, qualityFilters, productFilters] = [[], [], [], []]
@@ -233,14 +234,14 @@ export default {
       })
     },
     queryData () {
-      getDataList(this.queryParam).then(res => { this.data = res.data })
+      getDataList(this.queryParam).then(res => { this.data = res.result })
     },
     changeView (s) {
       this.detailsId = s
       this.details = true
     },
     refreshTable (s) {
-      getDataList(this.queryParam).then(res => { this.data = res.data })
+      getDataList(this.queryParam).then(res => { this.data = res.result })
     },
     setBalancePort (port) {
       this.balancePort = port
@@ -259,10 +260,10 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk () {
-          $this.$http.delete(`/api/machining?key=${row.key}`).then(res => {
-            if (res.status === 'success') {
+          deleteMachining({ key: row.key }).then(res => {
+            if (res.state === 'success') {
               $this.$message.info('删除成功！')
-              getDataList($this.queryParam).then(res => { $this.data = res.data })
+              getDataList($this.queryParam).then(res => { $this.data = res.result })
             }
           })
         }

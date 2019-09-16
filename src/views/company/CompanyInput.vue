@@ -1,6 +1,6 @@
 <template>
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
-    <router-link to="/setting/customer-list">
+    <router-link :to="{ name: 'CompanyList' }">
       <a-button type="primary">
         <a-icon type="left" />客户列表
       </a-button>
@@ -52,24 +52,10 @@
               'companyType',
               {rules: [{ required: true, message: '请选择公司类型' }], initialValue: 'customer'}
             ]"
-            buttonStyle="solid"
-            @change="companyTypeChange">
+            buttonStyle="solid">
             <a-radio-button value="customer">客户</a-radio-button>
             <a-radio-button value="supplier">供应商</a-radio-button>
           </a-radio-group>
-        </a-form-item>
-        <a-form-item
-          label="单据类型"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-select
-            v-decorator="[
-              'orderType',
-              {rules: [{ required: true, message: '请选择单据类型' }]}
-            ]"
-            placeholder="请选择单据类型">
-            <a-select-option v-for="type in orderType" :key="type">{{ type }}</a-select-option>
-          </a-select>
         </a-form-item>
       </a-form>
 
@@ -126,17 +112,11 @@
 </template>
 
 <script>
-const companyOrderType = {
-  'supplier': ['铜胚出入', '电铸出入', '刀具出入'],
-  'customer': ['铜胚出入', '成品出入']
-}
 export default {
   name: 'BaseForm',
   data () {
     return {
       spinning: true,
-      companyOrderType,
-      orderType: companyOrderType['customer'],
       state: false,
       value: 1,
       typeOption: {},
@@ -199,14 +179,12 @@ export default {
           if (this.$route.query.code) {
             this.$http.get(`/api/company?code=${this.$route.query.code}`)
               .then(res => {
-                this.orderType = companyOrderType[res.data[0].company_type]
-                this.data = JSON.parse(res.data[0].price_list)
+                this.data = JSON.parse(res.result[0].price_list)
                 this.form.setFieldsValue({
-                  code: res.data[0].code,
-                  name: res.data[0].name,
-                  remarks: res.data[0].remarks,
-                  type: res.data[0].type,
-                  orderType: res.data[0].order_type
+                  code: res.result[0].code,
+                  name: res.result[0].name,
+                  remarks: res.result[0].remarks,
+                  type: res.result[0].type
                 })
               })
           }
@@ -223,10 +201,6 @@ export default {
           }
           break
       }
-    },
-    companyTypeChange (e) {
-      this.form.resetFields('orderType')
-      this.orderType = companyOrderType[e.target.value]
     },
     handleSubmit (e) {
       e.preventDefault()

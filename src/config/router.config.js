@@ -145,7 +145,7 @@ export const asyncRouterMap = [
               {
                 path: '/bills/order/write',
                 name: 'BillsWriteOrder',
-                component: () => import('@/views/bills/order/OrderWrite'),
+                component: () => import('@/views/bills/order/OrderWrite/OrderWriteMaterial'),
                 meta: { title: '出入库单', keepAlive: false }
               },
               {
@@ -176,6 +176,55 @@ export const asyncRouterMap = [
           }
         ]
       },
+      // 仓库管理
+      {
+        path: '/warehouse',
+        name: 'Warehouse',
+        component: RouteView,
+        redirect: '/warehouse/material',
+        meta: { title: '仓库', icon: 'shop', permission: [ 'profile' ] },
+        children: [
+          {
+            path: '/warehouse/material',
+            name: 'WarehouseMaterial',
+            component: () => import('@/views/warehouse/material/Main'),
+            meta: { title: '物料仓', permission: [ 'profile' ], keepAlive: false }
+          },
+          {
+            path: '/warehouse/send',
+            name: 'WarehouseSend',
+            component: () => import('@/views//warehouse/send/Main'),
+            meta: { title: '收发仓', permission: [ 'profile' ] }
+          },
+          {
+            path: '/warehouse/finished',
+            name: 'WarehouseFinished',
+            component: () => import('@/views/warehouse/finished/Main'),
+            meta: { title: '成品仓', permission: [ 'profile' ] }
+          }
+        ]
+      },
+      {
+        path: '/company',
+        name: 'Company',
+        component: RouteView,
+        redirect: '/company/basic',
+        meta: { title: '客户/供应商', icon: 'bank', permission: [ 'profile' ] },
+        children: [
+          {
+            path: '/company/company-input',
+            name: 'CompanyInput',
+            component: () => import('@/views/company/CompanyInput'),
+            meta: { title: '客户录入', permission: [ 'profile' ], keepAlive: false }
+          },
+          {
+            path: '/company/company-list',
+            name: 'CompanyList',
+            component: () => import('@/views/company/CompanyList'),
+            meta: { title: '客户列表', permission: [ 'profile' ], keepAlive: false }
+          }
+        ]
+      },
       // system setting
       {
         path: '/setting',
@@ -189,18 +238,6 @@ export const asyncRouterMap = [
             name: 'Basic',
             component: () => import('@/views/setting/Basic'),
             meta: { title: '基础配置', permission: [ 'profile' ] }
-          },
-          {
-            path: '/setting/customer-input',
-            name: 'CustomerInput',
-            component: () => import('@/views/setting/CustomerInput'),
-            meta: { title: '客户录入', permission: [ 'profile' ], keepAlive: false }
-          },
-          {
-            path: '/setting/customer-list',
-            name: 'CustomerList',
-            component: () => import('@/views/setting/CustomerList'),
-            meta: { title: '客户列表', permission: [ 'profile' ], keepAlive: false }
           },
           {
             path: '/setting/price-list',

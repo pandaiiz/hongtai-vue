@@ -5,10 +5,10 @@
         <a-col :sm="8" :md="6" :xl="6" v-for="(company, key) in companyList" :key="key">
           <a-card hoverable>
             <template class="ant-card-actions" slot="actions">
-              <router-link :to="{ name:'CustomerInput', query: { type: 'edit', code: company.code } }">
+              <router-link :to="{ name:'CompanyInput', query: { type: 'edit', code: company.code } }">
                 <a-icon type="edit" />
               </router-link>
-              <router-link :to="{ name:'CustomerInput', query: { type: 'copy', code: company.code } }">
+              <router-link :to="{ name:'CompanyInput', query: { type: 'copy', code: company.code } }">
                 <a-icon type="copy" />
               </router-link>
               <a-icon type="delete" @click="deleteOption(company.code)" />
@@ -34,7 +34,7 @@ export default {
   created () {
     this.$http.get('/api/company?type=full').then(res => {
       if (res.status === 'success') {
-        this.companyList = res.data
+        this.companyList = res.result
         this.activeKey = ['1']
       }
     })
