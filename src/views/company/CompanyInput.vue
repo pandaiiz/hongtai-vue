@@ -193,9 +193,9 @@ export default {
           if (this.$route.query.code) {
             this.$http.get(`/api/company?code=${this.$route.query.code}`)
               .then(res => {
-                this.data = JSON.parse(res.data[0].price_list)
+                this.data = JSON.parse(res.result[0].price_list)
                 this.form.setFieldsValue({
-                  type: res.data[0].type
+                  type: res.result[0].type
                 })
               })
           }
@@ -228,7 +228,7 @@ export default {
             })
           } else {
             this.$http.get(`/api/company?code=${values.code}`).then(res => {
-              if (res.data.length > 0) {
+              if (res.result.length > 0) {
                 this.$message.info('客户编码已存在，请修改！')
                 return false
               }
