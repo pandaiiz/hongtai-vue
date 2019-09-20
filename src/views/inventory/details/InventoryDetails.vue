@@ -255,16 +255,12 @@ export default {
   },
   created () {
     this.getInventory()
-    setTimeout(() => {
-      this.loading = !this.loading
-    }, 1000)
   },
   methods: {
     getInventory () {
       this.$http.get('/api/inventory/total').then(res => {
-        if (res.result) console.log('2134')
-        else console.log('44444')
         this.total = res.result
+        this.loading = !this.loading
       })
     }
   }

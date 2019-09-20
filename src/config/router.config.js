@@ -94,7 +94,7 @@ export const asyncRouterMap = [
             path: '/inventory/details',
             name: 'InventoryDetails',
             component: () => import('@/views/inventory/details/InventoryDetails'),
-            meta: { title: '盘点', permission: [ 'profile' ] }
+            meta: { title: '盘点', permission: [ 'profile' ], keepAlive: false }
           }
           // {
           //   path: '/bills/order',

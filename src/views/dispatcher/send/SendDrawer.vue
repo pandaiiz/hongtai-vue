@@ -80,8 +80,8 @@
                   'type',
                   {rules: [{ required: true, message: '请选择发货类型' }]}
                 ]">
-                <a-radio-button value="1">发货</a-radio-button>
-                <a-radio-button value="2">收货</a-radio-button>
+                <a-radio-button value="发货">发货</a-radio-button>
+                <a-radio-button value="收货">收货</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
@@ -301,6 +301,9 @@ export default {
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
+        if (values.type === '发货') {
+          values.weight = -values.weight
+        }
         if (!err) {
           saveMachining(values).then(res => {
             if (res.state === 'success') {

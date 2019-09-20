@@ -2,16 +2,14 @@
   <a-card>
     <a-table :columns="columns" :dataSource="data" :rowKey="record => record.id" :pagination="false">
       <span slot="id" slot-scope="text">{{ text }}</span>
-      <span slot="state" slot-scope="text">{{ text === null ? '未入总仓' : '入总仓' }}</span>
-      <span slot="weight" slot-scope="text, record">{{ record.type === 'send' ? '发' : '收' }} {{ text }} <span v-if="text">g</span></span>
       <span slot="create_time" slot-scope="text">{{ moment(text).format('MM-DD HH:mm:ss') }}</span>
-      <span slot="update_time" slot-scope="text">{{ moment(text).format('MM-DD HH:mm:ss') }}</span>
+      <span slot="end_time" slot-scope="text">{{ text }}</span>
       <span slot="action" slot-scope="text, record">
         <router-link :to="{name:'index', query: { id: record.id }}">
           详情
         </router-link>
         <a-divider type="vertical" />
-        <a href="#" @click="putStore(record)">入总仓</a>
+        <a href="#" @click="endMachining(record)">入总仓</a>
       </span>
     </a-table>
   </a-card>
@@ -24,10 +22,6 @@ const columns = [{
   scopedSlots: { customRender: 'id' },
   align: 'center'
 }, {
-  title: '当前部门',
-  dataIndex: 'department',
-  align: 'center'
-}, {
   title: '成色',
   dataIndex: 'quality',
   align: 'center'
@@ -38,10 +32,6 @@ const columns = [{
 }, {
   title: '件数',
   dataIndex: 'number',
-  align: 'center'
-}, {
-  title: '当前损耗/未收回',
-  dataIndex: 'lost',
   align: 'center'
 }, {
   title: '重量',
@@ -60,8 +50,8 @@ const columns = [{
   align: 'center'
 }, {
   title: '修改日期',
-  dataIndex: 'update_time',
-  scopedSlots: { customRender: 'update_time' },
+  dataIndex: 'end_time',
+  scopedSlots: { customRender: 'end_time' },
   align: 'center'
 }, {
   title: '操作',
@@ -72,7 +62,7 @@ const columns = [{
 
 export default {
   created () {
-    this.getData()
+    this.getList()
   },
   data () {
     return {
@@ -82,11 +72,12 @@ export default {
   },
   methods: {
     moment,
-    getData () {
-      this.$http.get('/api/inventory').then(res => { this.data = res.data })
+    getList () {
+      this.$http.get('/api/inventory').then(res => { this.data = res.result })
     },
-    putStore (row) {
-      this.$http.post('/api/putStore', row).then(res => console.log(res))
+    endMachining (row) {
+      console.log(row)
+      this.$http.post('/api/warehouse/product', row).then(res => console.log(res))
     }
   }
 }
