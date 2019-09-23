@@ -44,7 +44,7 @@ export const asyncRouterMap = [
             path: '/dispatcher/report',
             name: 'ReportDay',
             component: () => import('@/views/dispatcher/report/ReportDay'),
-            meta: { title: '部门统计', permission: [ 'profile' ] }
+            meta: { title: '部门统计', permission: [ 'profile' ], keepAlive: false }
           }
           // , {
           //   path: '/dispatcher/warehouse',

@@ -127,7 +127,7 @@
             <a-form-item label="补录日期">
               <a-date-picker
                 v-decorator="[
-                  'supplement'
+                  'create_time'
                 ]"/>
             </a-form-item>
           </a-col>
@@ -179,7 +179,7 @@
 </template>
 <script>
 import { getInfoList } from '@/api/manage'
-import { saveMachining, scanMachining } from '@/api/send'
+import { saveMachining, scanMachining, supplementMachining } from '@/api/send'
 import { getStaff } from '@/api/staff'
 export default {
   name: 'SendDrawer',
@@ -305,6 +305,18 @@ export default {
           values.weight = -values.weight
         }
         if (!err) {
+          if (this.supplement) {
+            supplementMachining(values).then(res => {
+              console.log(res)
+              if (res.state === 'success') {
+                this.$message.info('新增成功！')
+                this.$emit('update:visible', false)
+                this.$emit('refresh')
+                this.form.resetFields()
+              }
+            })
+            return false
+          }
           saveMachining(values).then(res => {
             if (res.state === 'success') {
               this.$message.info('新增成功！')

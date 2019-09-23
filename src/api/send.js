@@ -7,6 +7,14 @@ const api = {
 
 // export default api
 
+export function supplementMachining (parameter) {
+  return axios({
+    url: '/api/machining/supplement',
+    method: 'post',
+    data: parameter
+  })
+}
+
 export function saveMachining (parameter) {
   return axios({
     url: api.machining,
