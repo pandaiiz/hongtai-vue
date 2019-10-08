@@ -2,17 +2,15 @@
   <div id="userLayout" :class="['user-layout-wrapper', device]">
     <div class="container">
       <div class="top">
-        <div class="header">
-          <a href="/">
-            <img src="~@/assets/logo.svg" class="logo" alt="logo">
-            <span class="title">鸿泰珠宝</span>
-          </a>
+        <div class="header ant-row ant-form-item">
+          <img src="~@/assets/logo.png" class="logo" alt="logo">
+          <span class="title">鸿泰黄金管理系统</span>
         </div>
       </div>
       <route-view></route-view>
       <div class="footer">
         <div class="copyright">
-          <!-- Copyright &copy; 2019 Wang出品 -->
+          Copyright &copy; 2019 Pirlo出品
         </div>
       </div>
     </div>

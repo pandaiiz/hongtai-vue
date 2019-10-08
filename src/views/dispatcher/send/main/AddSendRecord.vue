@@ -9,7 +9,7 @@
       @close="onClose"
       :visible="visible"
       :wrapStyle="{height: 'calc(100% - 108px)',overflow: 'auto',paddingBottom: '108px'}">
-      <a-form :form="form" layout="vertical" hideRequiredMark @submit="handleSubmit">
+      <a-form :form="form" layout="vertical" hideRequiredMark>
         <a-row :gutter="16">
           <a-col :span="12">
             <a-form-item label="传递单ID">
@@ -75,21 +75,21 @@
           <a-col :span="12">
             <a-form-item label="出库/入库">
               <a-radio-group
+                @change="selectChange"
                 buttonStyle="solid"
                 v-decorator="[
                   'type',
                   {rules: [{ required: true, message: '请选择发货类型' }]}
                 ]">
-                <a-radio-button value="发货">发货</a-radio-button>
-                <a-radio-button value="收货">收货</a-radio-button>
+                <a-radio-button value="发货"><a-icon type="caret-up" theme="filled" />发货</a-radio-button>
+                <a-radio-button value="收货"><a-icon type="caret-down" theme="filled" />收货</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
-        </a-row>
-        <a-row :gutter="16">
-          <a-col :span="24">
+          <a-col :span="12">
             <a-form-item label="类别">
               <a-radio-group
+                @change="selectChange"
                 buttonStyle="solid"
                 v-decorator="[
                   'category',
@@ -99,6 +99,8 @@
               </a-radio-group>
             </a-form-item>
           </a-col>
+        </a-row>
+        <a-row :gutter="16">
           <a-col :span="24">
             <a-form-item label="成色">
               <a-radio-group
@@ -171,7 +173,7 @@
           <a-button :style="{marginRight: '8px'}" @click="onClose" type="default">
             关闭
           </a-button>
-          <a-button html-type="submit" type="primary">提交</a-button>
+          <a-button type="primary" @click="handleSubmit">提交</a-button>
         </div>
       </a-form>
     </a-drawer>
@@ -179,10 +181,10 @@
 </template>
 <script>
 import { getInfoList } from '@/api/manage'
-import { saveMachining, scanMachining, supplementMachining } from '@/api/send'
+import { saveMachining, scanMachining } from '@/api/send'
 import { getStaff } from '@/api/staff'
 export default {
-  name: 'SendDrawer',
+  name: 'AddSendRecord',
   data () {
     return {
       showRemarks: false,
@@ -240,6 +242,9 @@ export default {
     }
   },
   methods: {
+    selectChange (e) {
+      this.form.setFieldsValue({ category: e.target.value === '发货' ? '半成品' : '成品' })
+    },
     showRemarksToggle () {
       this.showRemarks = !this.showRemarks
     },
@@ -305,18 +310,6 @@ export default {
           values.weight = -values.weight
         }
         if (!err) {
-          if (this.supplement) {
-            supplementMachining(values).then(res => {
-              console.log(res)
-              if (res.state === 'success') {
-                this.$message.info('新增成功！')
-                this.$emit('update:visible', false)
-                this.$emit('refresh')
-                this.form.resetFields()
-              }
-            })
-            return false
-          }
           saveMachining(values).then(res => {
             if (res.state === 'success') {
               this.$message.info('新增成功！')

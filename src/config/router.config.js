@@ -13,7 +13,7 @@ export const asyncRouterMap = [
       // dispatcher 收发
       {
         path: '/dispatcher',
-        name: 'dispatcher',
+        name: 'Dispatcher',
         redirect: '/dispatcher/send-receive',
         component: RouteView,
         meta: { title: '收发', keepAlive: true, icon: 'edit', permission: [ 'profile' ] },
@@ -21,7 +21,7 @@ export const asyncRouterMap = [
           {
             path: '/dispatcher/send-receive',
             name: 'SendReceive',
-            component: () => import('@/views/dispatcher/send/SendLayout'),
+            component: () => import('@/views/dispatcher/send/main/SendLayout'),
             meta: { title: '收发管理', permission: [ 'profile' ] },
             redirect: '/dispatcher/send/send-receive',
             hideChildrenInMenu: true,
@@ -29,14 +29,8 @@ export const asyncRouterMap = [
               {
                 path: '/dispatcher/send/send-receive',
                 name: 'EditList',
-                component: () => import('@/views/dispatcher/send/SendReceive'),
+                component: () => import('@/views/dispatcher/send/main/SendReceive'),
                 meta: { title: '收发管理', permission: [ 'profile' ] }
-              },
-              {
-                path: '/dispatcher/send/timeline',
-                name: 'SendTimeline',
-                component: () => import('@/views/dispatcher/send/SendTimeline'),
-                meta: { title: '收发时间轴', permission: [ 'profile' ] }
               }
             ]
           },
@@ -82,13 +76,7 @@ export const asyncRouterMap = [
             path: '/inventory/main',
             name: 'InventoryMain',
             component: () => import('@/views/inventory/main/Main'),
-            meta: { title: '传递单入库', permission: [ 'profile' ], keepAlive: false }
-          },
-          {
-            path: '/inventory/store',
-            name: 'InventoryStore',
-            component: () => import('@/views/inventory/store/InventoryStore'),
-            meta: { title: '总仓详情', permission: [ 'profile' ] }
+            meta: { title: '传递单', permission: [ 'profile' ], keepAlive: false }
           },
           {
             path: '/inventory/details',

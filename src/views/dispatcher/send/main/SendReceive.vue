@@ -9,7 +9,8 @@
             v-model="queryParam.date"
             :format="dateFormat"
           />
-          <send-drawer :fillData.sync="fillData" :visible.sync="visible" :balancePort="balancePort" @refresh="refreshTable"></send-drawer>
+          <add-send-order></add-send-order>
+          <add-send-record :fillData.sync="fillData" :visible.sync="visible" :balancePort="balancePort" @refresh="refreshTable"></add-send-record>
           <a-select style="margin-left: 8px" defaultValue="port1" :value="balancePort" @change="setBalancePort">
             <a-select-option value="port1">1号秤</a-select-option>
             <a-select-option value="port2">2号秤</a-select-option>
@@ -85,7 +86,6 @@
         </template>
       </a-table>
     </a-card>
-    <send-time-line :details.sync="details" :detailsId="detailsId"></send-time-line>
   </div>
 </template>
 
@@ -93,13 +93,14 @@
 import { getDataList, getInfoList } from '@/api/manage'
 import { deleteMachining } from '@/api/send'
 import moment from 'moment'
-import SendDrawer from './SendDrawer'
-import SendTimeLine from './SendTimeline'
+
+import AddSendOrder from './AddSendOrder'
+import AddSendRecord from './AddSendRecord'
 
 export default {
   components: {
-    SendDrawer,
-    SendTimeLine
+    AddSendRecord,
+    AddSendOrder
   },
   data () {
     return {
@@ -173,13 +174,13 @@ export default {
             align: 'center',
             title: '类型',
             dataIndex: 'type',
-            customRender: (type) => type === 'send' ? <div>发货</div> : <div>收货</div>,
+            customRender: (type) => type === '发货' ? <div>发货</div> : <div>收货</div>,
             filters: [{
               text: '发货',
-              value: 'send'
+              value: '收货'
             }, {
               text: '收货',
-              value: 'receive'
+              value: '收货'
             }]
           },
           {

@@ -14,13 +14,13 @@
         </span>
         <a-menu slot="overlay" class="user-dropdown-menu-wrapper">
           <a-menu-item key="0">
-            <router-link :to="{ name: 'center' }">
+            <router-link :to="{ name: 'setting' }">
               <a-icon type="user"/>
               <span>个人中心</span>
             </router-link>
           </a-menu-item>
           <a-menu-item key="1">
-            <router-link :to="{ name: 'settings' }">
+            <router-link :to="{ name: 'InventoryMain' }">
               <a-icon type="setting"/>
               <span>账户设置</span>
             </router-link>
@@ -52,7 +52,6 @@ export default {
     ...mapGetters(['nickname', 'avatar']),
     handleLogout () {
       const that = this
-
       this.$confirm({
         title: '提示',
         content: '真的要注销登录吗 ?',

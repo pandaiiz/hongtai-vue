@@ -9,9 +9,26 @@
           详情
         </router-link>
         <a-divider type="vertical" />
-        <a href="#" @click="endMachining(record)">入总仓</a>
+        <a href="#" @click="endMachining(record, '废品')">入废品</a>
+        <a-divider type="vertical" />
+        <a href="#" @click="endMachining(record, '成品')">入成品</a>
       </span>
     </a-table>
+    <a-modal
+      title="请检查此单数值是否正确？"
+      :visible="visible"
+      @ok="handleOk"
+      :confirmLoading="confirmLoading"
+      @cancel="handleCancel">
+      <span v-if="inType == '成品'">
+        <div>已入成品：200g | 收发仓当前：500g | 最近入库成品： 200g</div>
+        <a-input addonBefore="成品" :value="details.success" />
+      </span>
+      <span v-if="inType == '废品'">
+        <div>已入废品：200g | 此单累计废品：200g</div>
+        <a-input addonBefore="废品" :value="details.abandon" />
+      </span>
+    </a-modal>
   </a-card>
 </template>
 <script>
@@ -66,8 +83,15 @@ export default {
   },
   data () {
     return {
+      confirmLoading: false,
       data: null,
-      columns
+      columns,
+      visible: false,
+      inType: '',
+      details: {
+        lost: '',
+        abandon: ''
+      }
     }
   },
   methods: {
@@ -75,9 +99,35 @@ export default {
     getList () {
       this.$http.get('/api/inventory').then(res => { this.data = res.result })
     },
-    endMachining (row) {
-      console.log(row)
-      this.$http.post('/api/warehouse/product', row).then(res => console.log(res))
+    endMachining (row, type) {
+      this.visible = true
+      this.inType = type
+      if (type === '成品') this.$http.get(`/api/warehouse/product/order?id=${row.id}`).then(res => { console.log(res) })
+      if (type === '废品') this.$http.get(`/api/warehouse/material/order?id=${row.id}`).then(res => { console.log(res) })
+    },
+    // handleOk (e) {
+    //   this.confirmLoading = true
+    //   const obj1 = {
+    //     name: '板料',
+    //     weight: 100,
+    //     order_id: 222,
+    //     state: '废料'
+    //   }
+    //   const obj2 = {
+    //     name: '板料',
+    //     weight: 100,
+    //     order_id: 222,
+    //     state: '入库'
+    //   }
+    //   this.$http.get(`/api/warehouse/product/order`, obj).then(res => { this.visible = false; this.confirmLoading = false })
+    //   // setTimeout(() => {
+    //   //   this.visible = false
+    //   //   this.confirmLoading = false
+    //   // }, 2000)
+    // },
+    handleCancel (e) {
+      console.log('Clicked cancel button')
+      this.visible = false
     }
   }
 }
