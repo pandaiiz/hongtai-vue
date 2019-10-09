@@ -7,7 +7,7 @@
       @cancel="handleCancel">
       <template slot="footer">
         <a-button v-if="!barcode" key="submit" type="primary" :loading="loading" @click="handleSubmit">提交</a-button>
-        <a-button key="back" @click="print">打印</a-button>
+        <a-button key="back" @click="print" v-print="'#printTest'">打印</a-button>
       </template>
       <a-form v-if="!barcode" :form="form">
         <a-form-item label="板料">
@@ -43,7 +43,7 @@
             placeholder="请输入此单的重量"/></a-select>
         </a-form-item>
       </a-form>
-      <barcode v-if="barcode" :value="barcode">
+      <barcode v-if="barcode" :value="barcode" id="printTest">
         Show this if the rendering fails.
       </barcode>
     </a-modal>

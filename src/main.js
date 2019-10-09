@@ -6,6 +6,7 @@ import App from './App.vue'
 import router from './router'
 import store from './store/'
 import { VueAxios } from './utils/request'
+import Print from 'vue-print-nb'
 
 // mock
 // import './mock'
@@ -19,6 +20,7 @@ Vue.config.productionTip = false
 
 // mount axios Vue.$http and this.$http
 Vue.use(VueAxios)
+Vue.use(Print)
 
 new Vue({
   router,
