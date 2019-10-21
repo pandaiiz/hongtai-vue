@@ -1,13 +1,24 @@
 import { axios } from '@/utils/request'
+import api from '@/api/index'
 
-const api = {
-  staff: '/api/staff'
+export function getStaffList () {
+  return axios({
+    url: api.Staff,
+    method: 'get'
+  })
 }
 
-export function getStaff (parameter) {
+export function getStaff (id) {
   return axios({
-    url: api.staff,
-    method: 'get',
+    url: `${api.Staff}/${id}`,
+    method: 'get'
+  })
+}
+
+export function putStaff (parameter) {
+  return axios({
+    url: api.Staff,
+    method: 'put',
     params: parameter
   })
 }

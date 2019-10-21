@@ -11,7 +11,7 @@
             <a-form-item label="入库材料" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
               <a-select
                 v-decorator="[
-                  'name',
+                  'material',
                   {rules: [{ required: true, message: '请选择入库材料类型' }]}
                 ]"
                 placeholder="请选择入库材料类型">
@@ -26,7 +26,7 @@
                 @blur="findCompanyName($event)"
                 placeholder="请输入公司编码"
                 v-decorator="[
-                  'company_code',
+                  'companyCode',
                   {rules: [{ required: true, message: '请输入公司编码' }]}
                 ]"
               />
@@ -38,7 +38,7 @@
             <a-form-item label="公司名称" :label-col="{ span: 8 }" :wrapper-col="{ span: 16 }">
               <a-select
                 v-decorator="[
-                  'company_name',
+                  'companyName',
                   {rules: [{ required: true, message: '请输入公司名称' }]}
                 ]"
                 placeholder="请输入公司名称"
@@ -56,7 +56,7 @@
               <a-radio-group
                 buttonStyle="solid"
                 v-decorator="[
-                  'state',
+                  'type',
                   {rules: [{ required: true, message: '请选择出入库类型' }]}
                 ]"
               >
@@ -87,12 +87,12 @@
 </template>
 
 <script>
-import { getCompanyList } from '@/api/manage'
+// import { getCompanyList } from '@/api/manage'
 import moment from 'moment'
 export default {
   data () {
     return {
-      companys: [],
+      companys: [{ code: 123, name: '测试公司' }],
       options: []
     }
   },
@@ -100,32 +100,46 @@ export default {
     this.form = this.$form.createForm(this)
   },
   created () {
-    getCompanyList().then(res => { if (res.state === 'success') this.companys = res.result })
+    this.$http.get('/admin/api/rest/material').then((res) => {
+      console.log(res)
+    })
+    // getCompanyList().then(res => { if (res.state === 'success') this.companys = res.result })
   },
   methods: {
     findCompanyName (e) {
       if (!e.target.value) {
         return
       }
-      getCompanyList({ code: e.target.value }).then(res => {
-        if (res.state === 'success') {
-          if (res.result.length > 0) {
-            this.form.setFieldsValue({
-              company_name: res.result[0].name
-            })
-          } else {
-            this.$message.error('未查到此条用户编码')
-          }
-        }
-      })
+      console.log('22')
+      // getCompanyList({ code: e.target.value }).then(res => {
+      //   if (res.state === 'success') {
+      //     if (res.result.length > 0) {
+      //       this.form.setFieldsValue({
+      //         company_name: res.result[0].name
+      //       })
+      //     } else {
+      //       this.$message.error('未查到此条用户编码')
+      //     }
+      //   }
+      // })
     },
     moment,
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
-        if (!err) values.weight = values.state === '入库' ? parseFloat(values.weight) : -parseFloat(values.weight)
-        this.$http.post('/api/warehouse/material', values).then(res => {
-          if (res.state === 'success') this.$message.info('新增成功！'); this.reset()
+        if (!err) values.weight = values.type === '入库' ? parseFloat(values.weight) : -parseFloat(values.weight)
+        const submit = {
+          state: true,
+          weight: values.weight,
+          material: values.material,
+          from: '单据',
+          company: {
+            name: values.companyName,
+            code: values.companyCode
+          }
+        }
+        this.$http.post('/admin/api/rest/material', submit).then(res => {
+          if (res._id) this.$message.info('新增成功！'); this.reset()
         })
       })
     },

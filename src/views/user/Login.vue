@@ -65,7 +65,9 @@ export default {
       form: this.$form.createForm(this)
     }
   },
-  created () {},
+  created () {
+    this.$router.push({ name: 'Processing' })
+  },
   methods: {
     ...mapActions(['Login', 'Logout']),
     handleSubmit (e) {
@@ -79,13 +81,13 @@ export default {
           const loginParams = { ...values }
           // loginParams.password = md5(values.password)
           Login(loginParams)
-            .then((res) => this.loginSuccess(res))
+            .then((res) => { console.log(res); this.loginSuccess(res) })
             .catch(err => this.requestFailed(err))
         }
       })
     },
     loginSuccess (res) {
-      this.$router.push({ name: 'Dispatcher' })
+      this.$router.push({ name: 'Processing' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
         this.$notification.success({

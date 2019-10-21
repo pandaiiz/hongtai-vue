@@ -19,7 +19,7 @@ export default {
   },
   methods: {
     loadDetails () {
-      this.$http.get('/api/warehouse/material').then(res => { this.details = res.result })
+      this.$http.get('/admin/api/rest/material').then(res => { this.details = res })
     }
   }
 }

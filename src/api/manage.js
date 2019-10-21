@@ -1,11 +1,11 @@
 import { axios } from '@/utils/request'
 
 const api = {
-  data: '/api/machining',
+  data: '/admin/api/rest/transfer_records',
   order: '/api/order',
   company: '/api/company',
   statistics: '/api/statistics',
-  list: '/api/list',
+  list: '/admin/api/rest/settings',
   user: '/api/user',
   role: '/api/role',
   service: '/api/service',

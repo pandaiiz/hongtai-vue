@@ -8,60 +8,44 @@ export const asyncRouterMap = [
     name: 'index',
     component: BasicLayout,
     meta: { title: '首页' },
-    redirect: '/dispatcher/send-receive',
+    redirect: '/processing/send-receive',
     children: [
-      // dispatcher 收发
+      // processing 收发
       {
-        path: '/dispatcher',
-        name: 'Dispatcher',
-        redirect: '/dispatcher/send-receive',
+        path: '/processing',
+        name: 'Processing',
+        redirect: '/processing/send-receive',
         component: RouteView,
         meta: { title: '收发', keepAlive: true, icon: 'edit', permission: [ 'profile' ] },
         children: [
           {
-            path: '/dispatcher/send-receive',
+            path: '/processing/send-receive',
             name: 'SendReceive',
-            component: () => import('@/views/dispatcher/send/main/SendLayout'),
+            component: () => import('@/views/processing/send/main/SendLayout'),
             meta: { title: '收发管理', permission: [ 'profile' ] },
-            redirect: '/dispatcher/send/send-receive',
+            redirect: '/processing/send/send-receive',
             hideChildrenInMenu: true,
             children: [
               {
-                path: '/dispatcher/send/send-receive',
+                path: '/processing/send/send-receive',
                 name: 'EditList',
-                component: () => import('@/views/dispatcher/send/main/SendReceive'),
+                component: () => import('@/views/processing/send/main/SendReceive'),
                 meta: { title: '收发管理', permission: [ 'profile' ] }
               }
             ]
           },
           {
-            path: '/dispatcher/report',
+            path: '/processing/report',
             name: 'ReportDay',
-            component: () => import('@/views/dispatcher/report/ReportDay'),
+            component: () => import('@/views/processing/report/ReportDay'),
             meta: { title: '部门统计', permission: [ 'profile' ], keepAlive: false }
+          },
+          {
+            path: '/processing/transfer',
+            name: 'Transfer',
+            component: () => import('@/views/processing/Transfer'),
+            meta: { title: '传递单', permission: [ 'profile' ], keepAlive: false }
           }
-          // , {
-          //   path: '/dispatcher/warehouse',
-          //   name: 'Warehouse',
-          //   component: () => import('@/views/dispatcher/warehouse/WareHouseLayout'),
-          //   meta: { title: '仓库统计', permission: [ 'profile' ] },
-          //   redirect: '/dispatcher/warehouse/statistic',
-          //   hideChildrenInMenu: true,
-          //   children: [
-          //     {
-          //       path: '/dispatcher/warehouse/statistic',
-          //       name: 'ReportWarehouse',
-          //       component: () => import('@/views/dispatcher/warehouse/WareHouse'),
-          //       meta: { title: '仓库统计', permission: [ 'profile' ] }
-          //     },
-          //     {
-          //       path: '/dispatcher/warehouse/warehouse-details',
-          //       name: 'WareHouseDetails',
-          //       component: () => import('@/views/dispatcher/warehouse/WareHouseDetails'),
-          //       meta: { title: '仓库详情', permission: [ 'profile' ] }
-          //     }
-          //   ]
-          // }
         ]
       },
       // in and out 单据
@@ -224,26 +208,52 @@ export const asyncRouterMap = [
           {
             path: '/setting/basic',
             name: 'Basic',
-            component: () => import('@/views/setting/Basic'),
-            meta: { title: '基础配置', permission: [ 'profile' ] }
+            component: () => import('@/views/setting/basic/BasicLayout'),
+            meta: { title: '基础配置', permission: [ 'profile' ], keepAlive: false },
+            redirect: '/setting/basic/basic-list',
+            hideChildrenInMenu: true,
+            children: [
+              {
+                path: '/setting/basic/basic-list',
+                name: 'BasicList',
+                component: () => import('@/views/setting/basic/BasicList'),
+                meta: { title: '基础配置', permission: [ 'profile' ], keepAlive: false }
+              },
+              {
+                path: '/setting/basic/basic-edit',
+                name: 'BasicEdit',
+                component: () => import('@/views/setting/basic/BasicEdit'),
+                meta: { title: '配置修改', permission: [ 'profile' ], keepAlive: false }
+              }
+            ]
+          },
+          {
+            path: '/setting/staff',
+            name: 'Staff',
+            component: () => import('@/views/setting/staff/StaffLayout'),
+            meta: { title: '员工列表', permission: [ 'profile' ], keepAlive: false },
+            redirect: '/setting/staff/staff-list',
+            hideChildrenInMenu: true,
+            children: [
+              {
+                path: '/setting/staff/staff-list',
+                name: 'StaffList',
+                component: () => import('@/views/setting/staff/StaffList'),
+                meta: { title: '员工配置', permission: [ 'profile' ], keepAlive: false }
+              },
+              {
+                path: '/setting/staff/staff-edit',
+                name: 'StaffEdit',
+                component: () => import('@/views/setting/staff/StaffEdit'),
+                meta: { title: '员工修改', permission: [ 'profile' ], keepAlive: false }
+              }
+            ]
           },
           {
             path: '/setting/price-list',
             name: 'PriceList',
             component: () => import('@/views/setting/PriceList'),
             meta: { title: '价格明细', permission: [ 'profile' ], keepAlive: false }
-          },
-          {
-            path: '/setting/staff',
-            name: 'Staff',
-            component: () => import('@/views/setting/Staff'),
-            meta: { title: '员工录入', permission: [ 'profile' ], keepAlive: false }
-          },
-          {
-            path: '/setting/staff/list',
-            name: 'StaffList',
-            component: () => import('@/views/setting/StaffList'),
-            meta: { title: '员工列表', permission: [ 'profile' ], keepAlive: false }
           }
         ]
       }

@@ -13,7 +13,7 @@ import { axios } from '@/utils/request'
  */
 export function login (parameter) {
   return axios({
-    url: '/api/login',
+    url: 'http://localhost:3000/admin/api/login',
     method: 'post',
     data: parameter
   })

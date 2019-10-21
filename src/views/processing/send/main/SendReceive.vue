@@ -25,6 +25,7 @@
         :scroll="{ x: true }"
         :columns="columns"
         :pagination="false"
+        :rowKey="record => record._id"
         :dataSource="data">
         <template slot="id" slot-scope="text">
           <a @click="changeView(text)">
@@ -75,6 +76,9 @@
           >重置</a-button>
         </template>
         <a-icon slot="filterIcon" slot-scope="filtered" type="search" :style="{ color: filtered ? '#108ee9' : undefined }" />
+        <template slot="createTime" slot-scope="text">
+          {{ moment(text).format('MM-DD HH:mm') }}
+        </template>
         <template slot="action" slot-scope="text, record">
           <div class="editable-row-operations">
             <span>
@@ -120,8 +124,8 @@ export default {
   created () {
     const port = window.localStorage.getItem('port')
     this.balancePort = port
-    getDataList(this.queryParam).then(res => { this.data = res.result })
-    this.initHeaderFilter()
+    getDataList(this.queryParam).then(res => { this.data = res })
+    this.initHeader()
   },
   methods: {
     moment,
@@ -131,7 +135,6 @@ export default {
       return className
     },
     handleSearch (selectedKeys, confirm) {
-      console.log(selectedKeys)
       confirm()
     },
     handleReset (clearFilters) {
@@ -139,6 +142,88 @@ export default {
     },
     dataFilter (pagination, filters, sorter) {
       getDataList(Object.assign(this.queryParam, { filters })).then(res => { this.data = res.result })
+    },
+    initHeader () {
+      this.columns = [
+        {
+          align: 'center',
+          title: 'ID',
+          dataIndex: '_id',
+          scopedSlots: { customRender: '_id', filterDropdown: 'filterId', filterIcon: 'filterIcon' }
+          // sorter: (a, b) => a.id - b.id
+        },
+        {
+          align: 'center',
+          title: '部门',
+          dataIndex: 'department',
+          scopedSlots: { customRender: 'department' }
+        },
+        {
+          align: 'center',
+          title: '类别',
+          dataIndex: 'category',
+          scopedSlots: { customRender: 'category' }
+        },
+        {
+          align: 'center',
+          title: '类型',
+          dataIndex: 'type',
+          customRender: (type) => type === '发货' ? <div>发货</div> : <div>收货</div>,
+          filters: [{
+            text: '发货',
+            value: '收货'
+          }, {
+            text: '收货',
+            value: '收货'
+          }]
+        },
+        {
+          align: 'center',
+          title: '成色',
+          dataIndex: 'quality',
+          scopedSlots: { customRender: 'quality' }
+        },
+        {
+          align: 'center',
+          title: '产品',
+          dataIndex: 'product',
+          scopedSlots: { customRender: 'product' }
+        },
+        {
+          align: 'center',
+          title: '重量(g)',
+          dataIndex: 'weight',
+          scopedSlots: { customRender: 'weight' }
+        },
+        {
+          width: 'auto',
+          align: 'center',
+          title: '件数',
+          dataIndex: 'number',
+          scopedSlots: { customRender: 'number' }
+        },
+        {
+          align: 'center',
+          title: '备注',
+          dataIndex: 'remarks',
+          scopedSlots: { customRender: 'remarks', filterDropdown: 'filterDropdown', filterIcon: 'filterIcon' }
+        },
+        {
+          width: '50px',
+          align: 'center',
+          title: '时间',
+          dataIndex: 'createTime',
+          scopedSlots: { customRender: 'createTime' }
+          // customRender: (time) => { return <div class="table-time">{moment(time).format('YYYY-MM-DD HH:mm')}</div> }
+        },
+        {
+          width: '100px',
+          align: 'center',
+          title: '操作',
+          dataIndex: 'action',
+          scopedSlots: { customRender: 'action' }
+        }
+      ]
     },
     initHeaderFilter () {
       const [departmentFilters, categoryFilters, qualityFilters, productFilters] = [[], [], [], []]

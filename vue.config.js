@@ -95,9 +95,9 @@ module.exports = {
     // development server port 8000
     port: 8000,
     proxy: {
-      '/api': {
+      '/admin/api': {
         // target: 'http://192.168.123.100:4888',
-        target: 'http://localhost:4888',
+        target: 'http://localhost:3000',
         ws: false,
         changeOrigin: true
       }

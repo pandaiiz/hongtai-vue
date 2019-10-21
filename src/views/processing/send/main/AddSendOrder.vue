@@ -26,21 +26,33 @@
         </a-form-item>
         <a-form-item
           label="成色">
-          <a-select
+          <a-input
+            v-decorator="[
+              'quality',
+              {rules: [{ required: true, message: 'Please input your note!' }]}]"
+            placeholder="请输入此单的成色">
+          </a-input>
+          <!-- <a-select
             :options="data.quality"
             v-decorator="[
               'quality',
               {rules: [{ required: true, message: 'Please input your note!' }]}]"
-            placeholder="请输入此单的重量"/></a-select>
+            placeholder="请输入此单的成色"/></a-select> -->
         </a-form-item>
         <a-form-item
           label="产品">
-          <a-select
+          <a-input
+            v-decorator="[
+              'product',
+              {rules: [{ required: true, message: 'Please input your note!' }]}]"
+            placeholder="请输入此单的成色">
+          </a-input>
+          <!-- <a-select
             :options="data.product"
             v-decorator="[
               'product',
               {rules: [{ required: true, message: 'Please input your note!' }]}]"
-            placeholder="请输入此单的重量"/></a-select>
+            placeholder="请输入此单的产品"/></a-select> -->
         </a-form-item>
       </a-form>
       <barcode v-if="barcode" :value="barcode" id="printTest">
@@ -53,6 +65,7 @@
 <script>
 import { getInfoList } from '@/api/manage'
 import VueBarcode from 'vue-barcode'
+
 export default {
   name: 'AddSendOrder',
   components: {
@@ -74,12 +87,39 @@ export default {
     this.init()
   },
   methods: {
-    handleSubmit (e) {
+    async handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          this.$http.post('/api/warehouse/send/create', values).then(res => { this.loading = false; this.barcode = res.result.insertId })
+          const submit = {
+            material: [{
+              'name': '板料',
+              weight: -values.weight
+            }, {
+              'name': '补口',
+              weight: -values.weight
+            }],
+            number: +values.number,
+            product: values.product,
+            quality: values.quality
+          }
+          this.$http.post('/admin/api/rest/transfer', submit)
+            .then((transfer) => { return transfer })
+            .then((res) => {
+              this.barcode = res._id
+              const materials = []
+              res.material.map(val => {
+                materials.push({
+                  material: val.name,
+                  weight: val.weight,
+                  transfer: res._id,
+                  from: '加工',
+                  remarks: res.remarks
+                })
+              })
+              return this.$http.post('/admin/api/rest/materials', materials)
+            }).then(res => { this.loading = false })
         }
       })
     },
