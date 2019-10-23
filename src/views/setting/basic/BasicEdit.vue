@@ -54,7 +54,9 @@ export default {
           scopedSlots: { customRender: 'operation' }
         }
       ],
-      data: {}
+      data: {
+        options: []
+      }
     }
   },
   created () {
@@ -62,12 +64,13 @@ export default {
   },
   methods: {
     getData () {
+      if (!this.$route.query.id) return
       getSetting(this.$route.query.id).then(res => {
-        res.options.map((val, key) => {
+        res.options.forEach((val, key) => {
           val.key = key
           val.editable = false
         })
-        res.dataIndex.map(index => {
+        res.dataIndex.forEach(index => {
           this.editField.push(index.field)
           this.columns.unshift({
             title: index.title,

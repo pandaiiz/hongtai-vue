@@ -1,10 +1,11 @@
 <template>
   <a-card>
+    <a-button @click="() => $router.push({ name: 'StaffEdit' })">新增</a-button>
     <a-table :columns="columns" :dataSource="staffs" :rowKey="(record) => record._id" :pagination="false">
       <span slot="action" slot-scope="text, record">
         <a @click="() => $router.push({ name: 'StaffEdit', query: { id: record._id } })">编辑</a>
         <a-divider type="vertical"></a-divider>
-        <a @click="() => $router.push({ name: 'BasicEdit', query: { id: record._id } })">删除</a>
+        <a @click="deleteOption(record._id)">删除</a>
       </span>
     </a-table>
   </a-card>
@@ -47,6 +48,16 @@ export default {
   },
   created () {
     getStaffList().then(res => { this.staffs = res })
+  },
+  methods: {
+    deleteOption (id) {
+      this.$http.delete(`/admin/api/rest/staff/${id}`).then(res => {
+        if (res) {
+          this.$message.success('删除成功！')
+          getStaffList().then(res => { this.staffs = res })
+        }
+      })
+    }
   }
 }
 </script>

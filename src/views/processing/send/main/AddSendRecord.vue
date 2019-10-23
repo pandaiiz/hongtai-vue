@@ -44,7 +44,7 @@
                 ]"
                 placeholder="请选择部门"
               >
-                <a-select-option v-for="item in infoList.department" :key="item" :value="item">{{ item }}</a-select-option>
+                <a-select-option v-for="(item, key) in optionList.department" :key="item.name + key" :value="item.name">{{ item.name }}</a-select-option>
               </a-select>
             </a-form-item>
           </a-col>
@@ -95,7 +95,7 @@
                   'category',
                   {rules: [{ required: true, message: '请选择类别' }]}
                 ]">
-                <a-radio-button v-for="item in infoList.category" :key="item" :value="item">{{ item }}</a-radio-button>
+                <a-radio-button v-for="(item, key) in optionList.category" :key="item.name + key" :value="item.name">{{ item.name }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
@@ -109,7 +109,7 @@
                   'quality',
                   {rules: [{ required: true, message: '请选择成色' }], initialValue: ''}
                 ]">
-                <a-radio-button v-for="item in infoList.quality" :key="item.name" :value="item.name">{{ item.name }}</a-radio-button>
+                <a-radio-button v-for="(item, key) in optionList.quality" :key="item.name + key" :value="item.name">{{ item.name }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
@@ -121,7 +121,7 @@
                   'product',
                   {rules: [{ required: true, message: '请选择产品' }]}
                 ]">
-                <a-radio-button v-for="item in infoList.product" :key="item" :value="item">{{ item }}</a-radio-button>
+                <a-radio-button v-for="(item, key) in optionList.product" :key="item.name + key" :value="item.name">{{ item.name }}</a-radio-button>
               </a-radio-group>
             </a-form-item>
           </a-col>
@@ -180,7 +180,7 @@
   </span>
 </template>
 <script>
-import { getInfoList } from '@/api/manage'
+import { getSettingList } from '@/api/setting'
 import { saveMachining, scanMachining } from '@/api/send'
 import { getStaff } from '@/api/staff'
 export default {
@@ -189,7 +189,7 @@ export default {
     return {
       showRemarks: false,
       form: this.$form.createForm(this),
-      infoList: {},
+      optionList: {},
       supplement: false
     }
   },
@@ -197,9 +197,11 @@ export default {
     this.form = this.$form.createForm(this)
   },
   created () {
-    getInfoList()
-      .then(res => {
-        this.infoList = res
+    getSettingList()
+      .then((res) => {
+        res.forEach((val) => {
+          this.optionList[val.field] = val.options
+        })
       })
   },
   props: {
@@ -322,13 +324,11 @@ export default {
       })
     },
     loadStaff (e) {
-      if (!e.target.value) {
-        return
-      }
-      getStaff({ code: e.target.value }).then(res => {
+      if (!e.target.value) return
+      getStaff(e.target.value).then(res => {
         this.form.setFieldsValue({
-          department: res.result[0].department,
-          staff: res.result[0].name
+          department: res.department,
+          staff: res.name
         })
       })
     }

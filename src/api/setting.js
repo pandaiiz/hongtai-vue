@@ -1,10 +1,25 @@
 import { axios } from '@/utils/request'
 import api from '@/api/index'
 
-export function getSetting (parameter) {
+export function getSettingList () {
+  return axios({
+    url: api.Settings,
+    method: 'get'
+  })
+}
+
+export function postSetting (id, parameter) {
+  return axios({
+    url: `${api.Settings}`,
+    method: 'post',
+    data: parameter
+  })
+}
+
+export function deleteSetting (parameter) {
   return axios({
     url: `${api.Settings}/${parameter}`,
-    method: 'get'
+    method: 'delete'
   })
 }
 
@@ -12,6 +27,13 @@ export function putSetting (id, parameter) {
   return axios({
     url: `${api.Settings}/${id}`,
     method: 'put',
-    params: parameter
+    data: parameter
+  })
+}
+
+export function getSetting (parameter) {
+  return axios({
+    url: `${api.Settings}/${parameter}`,
+    method: 'get'
   })
 }

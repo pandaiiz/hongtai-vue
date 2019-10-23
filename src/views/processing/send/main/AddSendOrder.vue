@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import { getInfoList } from '@/api/manage'
+import { getSettingList } from '@/api/setting'
 import VueBarcode from 'vue-barcode'
 
 export default {
@@ -84,7 +84,7 @@ export default {
     }
   },
   created () {
-    this.init()
+    // this.init()
   },
   methods: {
     async handleSubmit (e) {
@@ -104,10 +104,10 @@ export default {
             product: values.product,
             quality: values.quality
           }
-          this.$http.post('/admin/api/rest/transfer', submit)
+          this.$http.post('/admin/api/rest/transfers', submit)
             .then((transfer) => { return transfer })
             .then((res) => {
-              this.barcode = res._id
+              this.barcode = res.transferId
               const materials = []
               res.material.map(val => {
                 materials.push({
@@ -118,13 +118,19 @@ export default {
                   remarks: res.remarks
                 })
               })
-              return this.$http.post('/admin/api/rest/materials', materials)
-            }).then(res => { this.loading = false })
+              return materials
+            })
+            .then(materials => {
+              this.$http.post('/admin/api/rest/materials', materials).then(result => {
+                this.loading = false
+                this.$message.success('请打印标签')
+              })
+            })
         }
       })
     },
     init () {
-      getInfoList().then(res => {
+      getSettingList().then(res => {
         const productList = []
         res.product.map((val) => {
           const product = {}

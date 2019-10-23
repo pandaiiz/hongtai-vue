@@ -1,5 +1,6 @@
 <template>
   <a-card>
+    <a-button @click="() => $router.push({ name: 'BasicEdit' })">新增</a-button>
     <a-table :columns="columns" :dataSource="settings" :rowKey="(record) => record._id" :pagination="false">
       <span slot="action" slot-scope="text, record">
         <a @click="() => $router.push({ name: 'BasicEdit', query: { id: record._id } })">编辑</a>
@@ -8,6 +9,7 @@
   </a-card>
 </template>
 <script>
+import { getSettingList } from '@/api/setting'
 const columns = [{
   title: '选项',
   key: 'title',
@@ -41,7 +43,7 @@ export default {
   },
   methods: {
     initSettings () {
-      this.$http.get('/admin/api/rest/settings').then(res => { this.settings = res })
+      getSettingList().then(res => { this.settings = res })
     }
   }
 }

@@ -43,29 +43,25 @@ export default {
   },
   created () {
     this.init()
+    if (!this.$route.query.id) return
+    getStaff(this.$route.query.id).then((res) => {
+      this.form.setFieldsValue({
+        name: res.name,
+        staffCode: res.staffCode,
+        department: res.department
+      })
+    })
   },
   methods: {
     init () {
-      this.$http.get(`/admin/api/rest/settings?field=department`)
-        .then((res) => {
-          this.options = res.options
-        })
-        .then(getStaff(this.$route.query.id).then((res) => {
-          this.form.setFieldsValue({
-            name: res.name,
-            staffCode: res.staffCode,
-            department: res.department
-          })
-        }))
+      this.$http.get(`/admin/api/rest/settings?field=department`).then((res) => { this.options = res.options })
     },
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.$http.put(`/admin/api/rest/staffs/${this.$route.query.id}`, values)
-            .then(res => {
-              if (res.success) this.$message.success('提交成功！')
-            })
+          if (this.$route.query.id) this.$http.put(`/admin/api/rest/staffs/${this.$route.query.id}`, values).then(res => { if (res.success) this.$message.success('提交成功！') })
+          else this.$http.post(`/admin/api/rest/staffs`, values).then(res => { if (res) this.$message.success('提交成功！') })
         }
       })
     }
