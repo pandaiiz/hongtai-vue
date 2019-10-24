@@ -124,7 +124,7 @@ export default {
   created () {
     const port = window.localStorage.getItem('port')
     this.balancePort = port
-    getDataList(this.queryParam).then(res => { this.data = res })
+    getDataList(this.queryParam).then(res => { this.data = res; console.log(res) })
     this.initHeader()
   },
   methods: {
@@ -148,8 +148,8 @@ export default {
         {
           align: 'center',
           title: 'ID',
-          dataIndex: '_id',
-          scopedSlots: { customRender: '_id', filterDropdown: 'filterId', filterIcon: 'filterIcon' }
+          dataIndex: 'transferId',
+          scopedSlots: { customRender: 'transferId', filterDropdown: 'filterId', filterIcon: 'filterIcon' }
           // sorter: (a, b) => a.id - b.id
         },
         {

@@ -17,7 +17,7 @@
                 @blur="scan"
                 placeholder="请输入ID"
                 v-decorator="[
-                  'id', // 给表单赋值或拉取表单时，该input对应的key
+                  'transferId', // 给表单赋值或拉取表单时，该input对应的key
                   {rules: [{ required: true, message: '请输入ID' }] }
                 ]"
               />
@@ -180,8 +180,8 @@
   </span>
 </template>
 <script>
+import { saveTransferRecords } from '@/api/transferRecord'
 import { getSettingList } from '@/api/setting'
-import { saveMachining, scanMachining } from '@/api/send'
 import { getStaff } from '@/api/staff'
 export default {
   name: 'AddSendRecord',
@@ -281,26 +281,27 @@ export default {
       this.showRemarks = false
     },
     scan (e) {
-      scanMachining({ id: e.target.value }).then(res => {
-        if (res.result.length > 0) {
-          if (res.result[0].remarks) {
-            this.showRemarks = true
-            setTimeout(() => {
-              this.form.setFieldsValue({
-                remarks: res.result[0].remarks
-              })
-            }, 0)
-          }
-          this.form.setFieldsValue({
-            number: res.result[0].number,
-            weight: res.result[0].weight,
-            quality: res.result[0].quality,
-            product: res.result[0].product
-          })
-        } else {
-          this.form.resetFields(['number', 'weight', 'remarks', 'department', 'category', 'quality', 'product', 'type', 'store'])
-        }
-      })
+      this.$http.get('/admin/api/rest/transfer_records/23').then((res) => console.log(res))
+      // scanMachining({ id: e.target.value }).then(res => {
+      //   if (res.result.length > 0) {
+      //     if (res.result[0].remarks) {
+      //       this.showRemarks = true
+      //       setTimeout(() => {
+      //         this.form.setFieldsValue({
+      //           remarks: res.result[0].remarks
+      //         })
+      //       }, 0)
+      //     }
+      //     this.form.setFieldsValue({
+      //       number: res.result[0].number,
+      //       weight: res.result[0].weight,
+      //       quality: res.result[0].quality,
+      //       product: res.result[0].product
+      //     })
+      //   } else {
+      //     this.form.resetFields(['number', 'weight', 'remarks', 'department', 'category', 'quality', 'product', 'type', 'store'])
+      //   }
+      // })
     },
     onClose () {
       this.$emit('update:visible', false)
@@ -312,8 +313,8 @@ export default {
           values.weight = -values.weight
         }
         if (!err) {
-          saveMachining(values).then(res => {
-            if (res.state === 'success') {
+          saveTransferRecords(values).then(res => {
+            if (res) {
               this.$message.info('新增成功！')
               this.$emit('update:visible', false)
               this.$emit('refresh')

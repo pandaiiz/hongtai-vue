@@ -8,6 +8,8 @@ const api = {
   SendSmsErr: '/account/sms_err',
   Settings: '/admin/api/rest/settings',
   Staff: '/admin/api/rest/staffs',
+
+  TransferRecord: '/admin/api/rest/transfer_records',
   // get my info
   UserInfo: '/user/info'
 }
